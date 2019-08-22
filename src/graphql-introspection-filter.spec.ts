@@ -1,18 +1,20 @@
 import "@graphql-codegen/testing";
-
-import { makePublicIntrospectionFilter } from "./graphql-introspection-filter";
+import {
+  makePublicIntrospectionFilter,
+  createPublicDirectiveTypeDefs
+} from "./graphql-introspection-filter";
 import {
   buildSchema,
   introspectionQuery,
-  graphqlSync,
+  graphql,
   buildClientSchema,
   IntrospectionQuery,
   printSchema,
   GraphQLSchema
 } from "graphql";
 
-const printIntrospectionSdl = (filteredSchema: GraphQLSchema) => {
-  const result = graphqlSync(filteredSchema, introspectionQuery);
+const printIntrospectionSdl = async (filteredSchema: GraphQLSchema) => {
+  const result = await graphql(filteredSchema, introspectionQuery);
   const generatedSchema = printSchema(
     buildClientSchema(result.data as IntrospectionQuery)
   );
@@ -20,7 +22,7 @@ const printIntrospectionSdl = (filteredSchema: GraphQLSchema) => {
   return generatedSchema;
 };
 
-it("can be called", () => {
+it("can be called", async () => {
   const typeDefs = /* GraphQL */ `
     type User {
       id: ID!
@@ -32,13 +34,13 @@ it("can be called", () => {
       hello2: String @public
     }
 
-    directive @public on OBJECT | FIELD_DEFINITION | ENUM | UNION | INTERFACE | INPUT_OBJECT | SCALAR
+    ${createPublicDirectiveTypeDefs()}
   `;
 
   const schema = buildSchema(typeDefs);
 
   const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
-  const sdl = printIntrospectionSdl(filteredSchema);
+  const sdl = await printIntrospectionSdl(filteredSchema);
 
   expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
     type Query {
@@ -47,7 +49,7 @@ it("can be called", () => {
   `);
 });
 
-it("does not expose the public directive", () => {
+it("does not expose the public directive", async () => {
   const typeDefs = /* GraphQL */ `
     type User {
       id: ID!
@@ -56,21 +58,28 @@ it("does not expose the public directive", () => {
 
     type Query {
       me: User
-      hello2: String @public
+      hello2: String @public(roles: [DEFAULT])
     }
 
-    directive @public on OBJECT | FIELD_DEFINITION | ENUM | UNION | INTERFACE | INPUT_OBJECT | SCALAR
+    enum AccessRole {
+      DEFAULT
+      SHOWCASE_APP
+    }
+
+    ${createPublicDirectiveTypeDefs()}
   `;
 
   const schema = buildSchema(typeDefs);
 
-  const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
-  const sdl = printIntrospectionSdl(filteredSchema);
+  const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs, {
+    directiveArgumentName: "AccessRole"
+  });
+  const sdl = await printIntrospectionSdl(filteredSchema);
 
   expect(sdl.includes("public")).toEqual(false);
 });
 
-it("makes type public when its field is public", () => {
+it("makes type public when its field is public", async () => {
   const typeDefs = /* GraphQL */ `
     type User {
       id: ID! @public
@@ -82,13 +91,13 @@ it("makes type public when its field is public", () => {
       hello2: String
     }
 
-    directive @public on OBJECT | FIELD_DEFINITION | ENUM | UNION | INTERFACE | INPUT_OBJECT | SCALAR
+    ${createPublicDirectiveTypeDefs()}
   `;
 
   const schema = buildSchema(typeDefs);
 
   const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
-  const sdl = printIntrospectionSdl(filteredSchema);
+  const sdl = await printIntrospectionSdl(filteredSchema);
 
   expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
     type Query {
@@ -101,7 +110,7 @@ it("makes type public when its field is public", () => {
   `);
 });
 
-it("makes fields public when type is public", () => {
+it("makes fields public when type is public", async () => {
   const typeDefs = /* GraphQL */ `
     type User @public {
       id: ID!
@@ -113,13 +122,13 @@ it("makes fields public when type is public", () => {
       hello2: String
     }
 
-    directive @public on OBJECT | FIELD_DEFINITION | ENUM | UNION | INTERFACE | INPUT_OBJECT | SCALAR
+    ${createPublicDirectiveTypeDefs()}
   `;
 
   const schema = buildSchema(typeDefs);
 
   const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
-  const sdl = printIntrospectionSdl(filteredSchema);
+  const sdl = await printIntrospectionSdl(filteredSchema);
 
   expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
     type Query {
@@ -133,7 +142,7 @@ it("makes fields public when type is public", () => {
   `);
 });
 
-it("what if type is not public", () => {
+it("what if type is not public", async () => {
   const typeDefs = /* GraphQL */ `
     type User {
       id: ID!
@@ -145,14 +154,14 @@ it("what if type is not public", () => {
       hello2: String @public
     }
 
-    directive @public on OBJECT | FIELD_DEFINITION | ENUM | UNION | INTERFACE | INPUT_OBJECT | SCALAR
+    ${createPublicDirectiveTypeDefs()}
   `;
 
   const schema = buildSchema(typeDefs);
 
   const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
 
-  const sdl = printIntrospectionSdl(filteredSchema);
+  const sdl = await printIntrospectionSdl(filteredSchema);
 
   expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
     type Query {
@@ -161,7 +170,7 @@ it("what if type is not public", () => {
   `);
 });
 
-it("does not make unions public when type is not public", () => {
+it("does not make unions public when type is not public", async () => {
   const typeDefs = /* GraphQL */ `
     type UserNotFound {
       reason: String!
@@ -179,14 +188,14 @@ it("does not make unions public when type is not public", () => {
       hello2: String @public
     }
 
-    directive @public on OBJECT | FIELD_DEFINITION | ENUM | UNION | INTERFACE | INPUT_OBJECT | SCALAR
+    ${createPublicDirectiveTypeDefs()}
   `;
 
   const schema = buildSchema(typeDefs);
 
   const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
 
-  const sdl = printIntrospectionSdl(filteredSchema);
+  const sdl = await printIntrospectionSdl(filteredSchema);
 
   expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
     type Query {
@@ -195,7 +204,7 @@ it("does not make unions public when type is not public", () => {
   `);
 });
 
-it("makes unions public when type is public", () => {
+it("makes unions public when type is public", async () => {
   const typeDefs = /* GraphQL */ `
     type UserNotFound {
       reason: String! @public
@@ -213,13 +222,13 @@ it("makes unions public when type is public", () => {
       hello2: String @public
     }
 
-    directive @public on OBJECT | FIELD_DEFINITION | ENUM | UNION | INTERFACE | INPUT_OBJECT | SCALAR
+    ${createPublicDirectiveTypeDefs()}
   `;
 
   const schema = buildSchema(typeDefs);
 
   const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
-  const sdl = printIntrospectionSdl(filteredSchema);
+  const sdl = await printIntrospectionSdl(filteredSchema);
 
   expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
     type Query {
@@ -240,7 +249,7 @@ it("makes unions public when type is public", () => {
   `);
 });
 
-it("hides field/type if its interface is public", () => {
+it("hides field/type if its interface is public", async () => {
   const typeDefs = /* GraphQL */ `
     interface Node {
       id: ID!
@@ -262,13 +271,13 @@ it("hides field/type if its interface is public", () => {
       hello2: String @public
     }
 
-    directive @public on OBJECT | FIELD_DEFINITION | ENUM | UNION | INTERFACE | INPUT_OBJECT | SCALAR
+    ${createPublicDirectiveTypeDefs()}
   `;
 
   const schema = buildSchema(typeDefs);
 
   const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
-  const sdl = printIntrospectionSdl(filteredSchema);
+  const sdl = await printIntrospectionSdl(filteredSchema);
 
   expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
     type Query {
@@ -277,7 +286,7 @@ it("hides field/type if its interface is public", () => {
   `);
 });
 
-it("exposes field/type if its interface is public", () => {
+it("exposes field/type if its interface is public", async () => {
   const typeDefs = /* GraphQL */ `
     interface Node @public {
       id: ID!
@@ -299,13 +308,13 @@ it("exposes field/type if its interface is public", () => {
       hello2: String @public
     }
 
-    directive @public on OBJECT | FIELD_DEFINITION | ENUM | UNION | INTERFACE | INPUT_OBJECT | SCALAR
+    ${createPublicDirectiveTypeDefs()}
   `;
 
   const schema = buildSchema(typeDefs);
 
   const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
-  const sdl = printIntrospectionSdl(filteredSchema);
+  const sdl = await printIntrospectionSdl(filteredSchema);
 
   expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
     type Query {
@@ -315,7 +324,7 @@ it("exposes field/type if its interface is public", () => {
   `);
 });
 
-it("hides mutation with input types that are not marked as public", () => {
+it("hides mutation with input types that are not marked as public", async () => {
   const typeDefs = /* GraphQL */ `
     input Foo {
       foo: String
@@ -330,13 +339,13 @@ it("hides mutation with input types that are not marked as public", () => {
       person(foo: Foo): String @public
     }
 
-    directive @public on OBJECT | FIELD_DEFINITION | ENUM | UNION | INTERFACE | INPUT_OBJECT | SCALAR
+    ${createPublicDirectiveTypeDefs()}
   `;
 
   const schema = buildSchema(typeDefs);
 
   const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
-  const sdl = printIntrospectionSdl(filteredSchema);
+  const sdl = await printIntrospectionSdl(filteredSchema);
 
   expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
     type Mutation {
@@ -349,7 +358,7 @@ it("hides mutation with input types that are not marked as public", () => {
   `);
 });
 
-it("shows mutation with input types that are marked as public", () => {
+it("shows mutation with input types that are marked as public", async () => {
   const typeDefs = /* GraphQL */ `
     input Foo @public {
       foo: String
@@ -364,13 +373,13 @@ it("shows mutation with input types that are marked as public", () => {
       person(foo: Foo): String @public
     }
 
-    directive @public on OBJECT | FIELD_DEFINITION | ENUM | UNION | INTERFACE | INPUT_OBJECT | SCALAR
+    ${createPublicDirectiveTypeDefs()}
   `;
 
   const schema = buildSchema(typeDefs);
 
   const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
-  const sdl = printIntrospectionSdl(filteredSchema);
+  const sdl = await printIntrospectionSdl(filteredSchema);
 
   expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
     input Foo {
@@ -388,7 +397,7 @@ it("shows mutation with input types that are marked as public", () => {
   `);
 });
 
-it("exposes Scalars correctly", () => {
+it("exposes Scalars correctly", async () => {
   const typeDefs = /* GraphQL */ `
     scalar Upload @public
 
@@ -401,13 +410,13 @@ it("exposes Scalars correctly", () => {
       upload: Upload @public
     }
 
-    directive @public on OBJECT | FIELD_DEFINITION | ENUM | UNION | INTERFACE | INPUT_OBJECT | SCALAR
+    ${createPublicDirectiveTypeDefs()}
   `;
 
   const schema = buildSchema(typeDefs);
 
   const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
-  const sdl = printIntrospectionSdl(filteredSchema);
+  const sdl = await printIntrospectionSdl(filteredSchema);
 
   expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
     type Mutation {
@@ -417,6 +426,149 @@ it("exposes Scalars correctly", () => {
 
     type Query {
       foo: String
+    }
+  `);
+});
+
+it("roles: empty role list on field -> field is added to default context", async () => {
+  const typeDefs = /* GraphQL */ `
+    scalar Upload @public
+
+    type Query {
+      foo: String @public(roles: [])
+    }
+
+    type Mutation {
+      foo: String @public
+      upload: Upload @public
+    }
+
+    ${createPublicDirectiveTypeDefs()}
+  `;
+
+  const schema = buildSchema(typeDefs);
+
+  const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
+  const sdl = await printIntrospectionSdl(filteredSchema);
+
+  expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
+    type Mutation {
+      foo: String
+      upload: Upload
+    }
+
+    type Query {
+      foo: String
+    }
+  `);
+});
+
+it("roles: empty role list on scalar -> scalar is added to default context", async () => {
+  const typeDefs = /* GraphQL */ `
+    scalar Upload @public(roles: [])
+
+    type Query {
+      foo: String @public(roles: [])
+    }
+
+    type Mutation {
+      foo: String @public
+      upload: Upload @public
+    }
+
+    ${createPublicDirectiveTypeDefs()}
+  `;
+
+  const schema = buildSchema(typeDefs);
+
+  const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
+  const sdl = await printIntrospectionSdl(filteredSchema);
+
+  expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
+    type Mutation {
+      foo: String
+      upload: Upload
+    }
+
+    type Query {
+      foo: String
+    }
+  `);
+});
+
+it("roles: empty role list on enum -> enum is added to the default context", async () => {
+  const typeDefs = /* GraphQL */ `
+    enum Foo @public(roles: []) {
+      yesy
+    }
+
+    type Query {
+      foo: String @public(roles: [])
+    }
+
+    type Mutation {
+      foo: String @public
+    }
+
+    ${createPublicDirectiveTypeDefs()}
+  `;
+
+  const schema = buildSchema(typeDefs);
+
+  const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
+  const sdl = await printIntrospectionSdl(filteredSchema);
+
+  expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
+    enum Foo {
+      yesy
+    }
+
+    type Mutation {
+      foo: String
+    }
+
+    type Query {
+      foo: String
+    }
+  `);
+});
+
+it("roles: empty role list on union -> union is added to default context", async () => {
+  const typeDefs = /* GraphQL */ `
+    type User {
+      id: String @public
+    }
+    union Foo @public(roles: []) = User
+
+    type Query {
+      foo: String @public
+    }
+
+    type Mutation {
+      foo: String @public
+    }
+
+    ${createPublicDirectiveTypeDefs()}
+  `;
+
+  const schema = buildSchema(typeDefs);
+
+  const filteredSchema = makePublicIntrospectionFilter(schema, typeDefs);
+  const sdl = await printIntrospectionSdl(filteredSchema);
+
+  expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
+    union Foo = User
+
+    type Mutation {
+      foo: String
+    }
+
+    type Query {
+      foo: String
+    }
+
+    type User {
+      id: String
     }
   `);
 });

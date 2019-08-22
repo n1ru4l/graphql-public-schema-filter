@@ -11,16 +11,13 @@ import {
   InterfaceTypeDefinitionNode,
   InputObjectTypeDefinitionNode,
   InputObjectTypeExtensionNode,
-  InputValueDefinitionNode
+  InputValueDefinitionNode,
+  DirectiveNode,
+  ScalarTypeDefinitionNode,
+  EnumTypeDefinitionNode,
+  UnionTypeDefinitionNode,
+  ArgumentNode
 } from "graphql";
-
-const colorYellow = "\x1b[33m";
-const colorReset = "\x1b[0m";
-
-export type Reporter = (message: string) => void;
-
-const defaultReporter: Reporter = (text: string) =>
-  console.warn(`${colorYellow}${text}${colorReset}`);
 
 const BASIC_TYPES = [
   "String",
@@ -32,13 +29,24 @@ const BASIC_TYPES = [
   "ID"
 ];
 
-const fieldHasPublicDirective = (
-  field: FieldDefinitionNode | InputValueDefinitionNode
-) => {
-  return (
-    field.directives &&
-    field.directives.some(directive => directive.name.value === "public")
-  );
+export interface CreateDirectiveTypeDefs {
+  directiveName?: string;
+  roleArgumentName?: string;
+  roleType?: string;
+}
+
+export const createPublicDirectiveTypeDefs = (
+  options?: CreateDirectiveTypeDefs
+): string => {
+  const directiveName = (options && options.directiveName) || "public";
+  const roleArgumentName = (options && options.roleArgumentName) || "roles";
+  const roleType = (options && options.roleType) || "String";
+
+  return /* GraphQL */ `
+    directive @${directiveName}(
+      ${roleArgumentName}: [${roleType}!]
+    ) on OBJECT | FIELD_DEFINITION | ENUM | UNION | INTERFACE | INPUT_OBJECT | SCALAR
+  `;
 };
 
 /**
@@ -60,9 +68,51 @@ const getWrappedTypeName = (type: TypeNode): string => {
   throw new TypeError("Invalid input");
 };
 
+const colorYellow = "\x1b[33m";
+const colorReset = "\x1b[0m";
+
+export type Reporter = (message: string) => void;
+
+const defaultReporter: Reporter = (text: string) =>
+  console.warn(`${colorYellow}${text}${colorReset}`);
+
+export type GetRoleFromContext = (
+  graphqlContext: unknown
+) => string | null | void;
+
 interface MakePublicIntrospectionFilterOptions {
-  reporter: Reporter;
+  reporter?: Reporter;
+  getRoleFromContext?: GetRoleFromContext;
+  directiveName?: string;
+  directiveArgumentName?: string;
 }
+
+interface RoleContext {
+  publicTypeNames: Set<string>;
+  publicFieldReturnTypes: Map<string, string>;
+  publicFieldArgumentTypes: Map<string, string[]>;
+  unionTypes: Map<string, string[]>;
+  interfaceTypes: Map<string, string[]>;
+  allAvailableFields: Set<string>;
+}
+
+const createRoleContext = (): RoleContext => ({
+  publicTypeNames: new Set(BASIC_TYPES),
+  publicFieldReturnTypes: new Map(),
+  publicFieldArgumentTypes: new Map(),
+  unionTypes: new Map(),
+  interfaceTypes: new Map(),
+  allAvailableFields: new Set()
+});
+
+const DEFAULT_ACCESS_IDENTIFIER = "DEFAULT";
+
+type GraphQLTypeObject =
+  | ObjectTypeExtensionNode
+  | ObjectTypeDefinitionNode
+  | InterfaceTypeDefinitionNode
+  | InputObjectTypeDefinitionNode
+  | InputObjectTypeExtensionNode;
 
 export const makePublicIntrospectionFilter = (
   schema: GraphQLSchema,
@@ -71,11 +121,69 @@ export const makePublicIntrospectionFilter = (
 ): GraphQLSchema => {
   const reporter = (options && options.reporter) || defaultReporter;
 
-  const publicTypeNames: Set<string> = new Set(BASIC_TYPES);
-  const publicFieldReturnTypes: Map<string, string> = new Map();
-  const publicFieldArgumentTypes: Map<string, string[]> = new Map();
-  const unionTypes: Map<string, string[]> = new Map();
-  const interfaceTypes: Map<string, string[]> = new Map();
+  const getRoleFromContext =
+    (options && options.getRoleFromContext) ||
+    (() => DEFAULT_ACCESS_IDENTIFIER);
+  const directiveName = (options && options.directiveName) || "public";
+  const directiveArgumentName = (options && options.directiveName) || "roles";
+
+  const findAllDirectivesForField = (
+    field: FieldDefinitionNode | InputValueDefinitionNode
+  ) =>
+    field.directives
+      ? field.directives.filter(
+          directive => directive.name.value === directiveName
+        )
+      : [];
+
+  const findAllObjectDirectives = (
+    object:
+      | GraphQLTypeObject
+      | ScalarTypeDefinitionNode
+      | EnumTypeDefinitionNode
+      | UnionTypeDefinitionNode
+  ) =>
+    object.directives
+      ? object.directives.filter(
+          directive => directive.name.value === directiveName
+        )
+      : [];
+
+  const findAllObjectFieldDirectives = (
+    object: GraphQLTypeObject
+  ): DirectiveNode[] =>
+    Array.isArray(object.fields)
+      ? object.fields
+          .map(findAllDirectivesForField)
+          .reduce((res, directives) => {
+            res.push(...directives);
+            return res;
+          }, [])
+      : [];
+
+  const roleSchemaAccess = new Map<string, RoleContext>();
+
+  const getOrCreateRoleSchemaAccess = (identifier: string): RoleContext => {
+    let roleSchema = roleSchemaAccess.get(identifier);
+    if (!roleSchema) {
+      roleSchema = createRoleContext();
+      roleSchemaAccess.set(identifier, roleSchema);
+    }
+    return roleSchema;
+  };
+
+  const getRoleAttribute = (directive: DirectiveNode): ArgumentNode =>
+    Array.isArray(directive.arguments)
+      ? directive.arguments.find(
+          (argument: ArgumentNode) =>
+            argument.name.value === directiveArgumentName &&
+            argument.value.kind === "ListValue" &&
+            (argument.value.values.every(
+              value => value.kind === "StringValue"
+            ) ||
+              argument.value.values.every(value => value.kind === "EnumValue"))
+        )
+      : null;
 
   const ast = parse(typeDefs);
 
@@ -87,52 +195,167 @@ export const makePublicIntrospectionFilter = (
       | InputObjectTypeDefinitionNode
       | InputObjectTypeExtensionNode
   ) => {
-    const isObjectPublic =
-      type.directives &&
-      type.directives.some(directive => directive.name.value === "public");
+    const objectDirectives = findAllObjectDirectives(type);
+    const objectFieldDirectives = findAllObjectFieldDirectives(type);
+    const objectAndObjectFieldDirectives = [
+      ...objectDirectives,
+      ...objectFieldDirectives
+    ];
 
-    const isAnyFieldPublic =
-      type.fields && type.fields.some(fieldHasPublicDirective);
+    if (objectAndObjectFieldDirectives.length) {
+      for (const directive of objectAndObjectFieldDirectives) {
+        const execActionForRoleContext = (roleContext: RoleContext) => {
+          roleContext.publicTypeNames.add(type.name.value);
+        };
+        const roleAttribute = getRoleAttribute(directive);
 
-    if (isObjectPublic || isAnyFieldPublic) {
-      publicTypeNames.add(type.name.value);
+        if (
+          roleAttribute &&
+          roleAttribute.value.kind === "ListValue" &&
+          roleAttribute.value.values.length
+        ) {
+          for (const roleAttributeValue of roleAttribute.value.values) {
+            if (
+              roleAttributeValue.kind === "StringValue" ||
+              roleAttributeValue.kind === "EnumValue"
+            ) {
+              const roleContext = getOrCreateRoleSchemaAccess(
+                roleAttributeValue.value
+              );
+              execActionForRoleContext(roleContext);
+            }
+          }
+        } else {
+          const roleContext = getOrCreateRoleSchemaAccess(
+            DEFAULT_ACCESS_IDENTIFIER
+          );
+          execActionForRoleContext(roleContext);
+        }
+      }
 
       if (
         (type.kind === "ObjectTypeDefinition" ||
           type.kind === "ObjectTypeExtension") &&
         type.interfaces
       ) {
-        interfaceTypes.set(
-          type.name.value,
-          type.interfaces.map(inter => inter.name.value)
-        );
+        for (const directive of objectAndObjectFieldDirectives) {
+          const execActionForRoleContext = (roleContext: RoleContext) => {
+            if (!type.interfaces) return;
+            roleContext.interfaceTypes.set(
+              type.name.value,
+              type.interfaces.map(inter => inter.name.value)
+            );
+          };
+          const roleAttribute = getRoleAttribute(directive);
+
+          if (
+            roleAttribute &&
+            roleAttribute.value.kind === "ListValue" &&
+            roleAttribute.value.values.length
+          ) {
+            for (const roleAttributeValue of roleAttribute.value.values) {
+              if (
+                roleAttributeValue.kind === "StringValue" ||
+                roleAttributeValue.kind === "EnumValue"
+              ) {
+                const roleContext = getOrCreateRoleSchemaAccess(
+                  roleAttributeValue.value
+                );
+                execActionForRoleContext(roleContext);
+              }
+            }
+          } else {
+            const roleContext = getOrCreateRoleSchemaAccess(
+              DEFAULT_ACCESS_IDENTIFIER
+            );
+            execActionForRoleContext(roleContext);
+          }
+        }
       }
 
       visit(type, {
         InputValueDefinition: {
           enter: (field /*, key, parent, path*/) => {
-            if (isObjectPublic || fieldHasPublicDirective(field)) {
-              publicFieldReturnTypes.set(
-                `${type.name.value}.${field.name.value}`,
-                getWrappedTypeName(field.type)
-              );
+            const fieldPublicDirectives = findAllDirectivesForField(field);
+            if (objectDirectives.length || fieldPublicDirectives.length) {
+              for (const directive of objectAndObjectFieldDirectives) {
+                const execActionForRoleContext = (roleContext: RoleContext) => {
+                  roleContext.publicFieldReturnTypes.set(
+                    `${type.name.value}.${field.name.value}`,
+                    getWrappedTypeName(field.type)
+                  );
+                };
+                const roleAttribute = getRoleAttribute(directive);
+
+                if (
+                  roleAttribute &&
+                  roleAttribute.value.kind === "ListValue" &&
+                  roleAttribute.value.values.length
+                ) {
+                  for (const roleAttributeValue of roleAttribute.value.values) {
+                    if (
+                      roleAttributeValue.kind === "StringValue" ||
+                      roleAttributeValue.kind === "EnumValue"
+                    ) {
+                      const roleContext = getOrCreateRoleSchemaAccess(
+                        roleAttributeValue.value
+                      );
+                      execActionForRoleContext(roleContext);
+                    }
+                  }
+                } else {
+                  const roleContext = getOrCreateRoleSchemaAccess(
+                    DEFAULT_ACCESS_IDENTIFIER
+                  );
+                  execActionForRoleContext(roleContext);
+                }
+              }
             }
           }
         },
         FieldDefinition: {
           enter: (field /*, key, parent, path*/) => {
-            if (isObjectPublic || fieldHasPublicDirective(field)) {
-              publicFieldReturnTypes.set(
-                `${type.name.value}.${field.name.value}`,
-                getWrappedTypeName(field.type)
-              );
-              if (field.arguments) {
-                publicFieldArgumentTypes.set(
-                  `${type.name.value}.${field.name.value}`,
-                  field.arguments.map(argument =>
-                    getWrappedTypeName(argument.type)
-                  )
-                );
+            const fieldPublicDirectives = findAllDirectivesForField(field);
+            if (objectDirectives.length || fieldPublicDirectives.length) {
+              for (const directive of objectAndObjectFieldDirectives) {
+                const execActionForRoleContext = (roleContext: RoleContext) => {
+                  roleContext.publicFieldReturnTypes.set(
+                    `${type.name.value}.${field.name.value}`,
+                    getWrappedTypeName(field.type)
+                  );
+                  if (field.arguments) {
+                    roleContext.publicFieldArgumentTypes.set(
+                      `${type.name.value}.${field.name.value}`,
+                      field.arguments.map(argument =>
+                        getWrappedTypeName(argument.type)
+                      )
+                    );
+                  }
+                };
+                const roleAttribute = getRoleAttribute(directive);
+
+                if (
+                  roleAttribute &&
+                  roleAttribute.value.kind === "ListValue" &&
+                  roleAttribute.value.values.length
+                ) {
+                  for (const roleAttributeValue of roleAttribute.value.values) {
+                    if (
+                      roleAttributeValue.kind === "StringValue" ||
+                      roleAttributeValue.kind === "EnumValue"
+                    ) {
+                      const roleContext = getOrCreateRoleSchemaAccess(
+                        roleAttributeValue.value
+                      );
+                      execActionForRoleContext(roleContext);
+                    }
+                  }
+                } else {
+                  const roleContext = getOrCreateRoleSchemaAccess(
+                    DEFAULT_ACCESS_IDENTIFIER
+                  );
+                  execActionForRoleContext(roleContext);
+                }
               }
             }
           }
@@ -146,11 +369,37 @@ export const makePublicIntrospectionFilter = (
   visit(ast, {
     ScalarTypeDefinition: {
       enter: scalar => {
-        if (
-          scalar.directives &&
-          scalar.directives.some(directive => directive.name.value === "public")
-        ) {
-          publicTypeNames.add(scalar.name.value);
+        const scalarDirectiveNodes = findAllObjectDirectives(scalar);
+        if (scalarDirectiveNodes.length) {
+          for (const directive of scalarDirectiveNodes) {
+            const execActionForRoleContext = (roleContext: RoleContext) => {
+              roleContext.publicTypeNames.add(scalar.name.value);
+            };
+            const roleAttribute = getRoleAttribute(directive);
+
+            if (
+              roleAttribute &&
+              roleAttribute.value.kind === "ListValue" &&
+              roleAttribute.value.values.length
+            ) {
+              for (const roleAttributeValue of roleAttribute.value.values) {
+                if (
+                  roleAttributeValue.kind === "StringValue" ||
+                  roleAttributeValue.kind === "EnumValue"
+                ) {
+                  const roleContext = getOrCreateRoleSchemaAccess(
+                    roleAttributeValue.value
+                  );
+                  execActionForRoleContext(roleContext);
+                }
+              }
+            } else {
+              const roleContext = getOrCreateRoleSchemaAccess(
+                DEFAULT_ACCESS_IDENTIFIER
+              );
+              execActionForRoleContext(roleContext);
+            }
+          }
         }
       }
     },
@@ -166,28 +415,79 @@ export const makePublicIntrospectionFilter = (
     },
     EnumTypeDefinition: {
       enter: type => {
-        if (
-          type.directives &&
-          type.directives.some(directive => directive.name.value === "public")
-        ) {
-          publicTypeNames.add(type.name.value);
-        }
+        const typeDirectiveNodes = findAllObjectDirectives(type);
+        if (typeDirectiveNodes.length) {
+          for (const directive of typeDirectiveNodes) {
+            const execActionForRoleContext = (roleContext: RoleContext) => {
+              roleContext.publicTypeNames.add(type.name.value);
+            };
+            const roleAttribute = getRoleAttribute(directive);
 
+            if (
+              roleAttribute &&
+              roleAttribute.value.kind === "ListValue" &&
+              roleAttribute.value.values.length
+            ) {
+              for (const roleAttributeValue of roleAttribute.value.values) {
+                if (
+                  roleAttributeValue.kind === "StringValue" ||
+                  roleAttributeValue.kind === "EnumValue"
+                ) {
+                  const roleContext = getOrCreateRoleSchemaAccess(
+                    roleAttributeValue.value
+                  );
+                  execActionForRoleContext(roleContext);
+                }
+              }
+            } else {
+              const roleContext = getOrCreateRoleSchemaAccess(
+                DEFAULT_ACCESS_IDENTIFIER
+              );
+              execActionForRoleContext(roleContext);
+            }
+          }
+        }
         return false;
       }
     },
     UnionTypeDefinition: {
       enter: type => {
-        if (
-          type.directives &&
-          type.directives.some(directive => directive.name.value === "public")
-        ) {
-          publicTypeNames.add(type.name.value);
-          if (type.types) {
-            unionTypes.set(
-              type.name.value,
-              type.types.map(type => type.name.value)
-            );
+        const unionDirectives = findAllObjectDirectives(type);
+        if (unionDirectives.length) {
+          for (const directive of unionDirectives) {
+            const execActionForRoleContext = (roleContext: RoleContext) => {
+              roleContext.publicTypeNames.add(type.name.value);
+              if (type.types) {
+                roleContext.unionTypes.set(
+                  type.name.value,
+                  type.types.map(type => type.name.value)
+                );
+              }
+            };
+            const roleAttribute = getRoleAttribute(directive);
+
+            if (
+              roleAttribute &&
+              roleAttribute.value.kind === "ListValue" &&
+              roleAttribute.value.values.length
+            ) {
+              for (const roleAttributeValue of roleAttribute.value.values) {
+                if (
+                  roleAttributeValue.kind === "StringValue" ||
+                  roleAttributeValue.kind === "EnumValue"
+                ) {
+                  const roleContext = getOrCreateRoleSchemaAccess(
+                    roleAttributeValue.value
+                  );
+                  execActionForRoleContext(roleContext);
+                }
+              }
+            } else {
+              const roleContext = getOrCreateRoleSchemaAccess(
+                DEFAULT_ACCESS_IDENTIFIER
+              );
+              execActionForRoleContext(roleContext);
+            }
           }
         }
 
@@ -211,74 +511,84 @@ export const makePublicIntrospectionFilter = (
     }
   });
 
-  const allAvailableFields = new Set(publicFieldReturnTypes.keys());
+  for (const [roleName, context] of roleSchemaAccess.entries()) {
+    reporter(`VALIDATION FOR ROLE "${roleName}"`);
 
-  // check availablity of union types
-  for (const [unionType, dependecyTypes] of unionTypes) {
-    for (const dependecyType of dependecyTypes) {
-      if (!publicTypeNames.has(dependecyType)) {
-        publicTypeNames.delete(unionType);
-        reporter(
-          `[public-introspection-filter] Type "${dependecyType}" is not marked as public.\n` +
-            ` -> The union "${unionType}" will not be marked as visible.`
-        );
+    context.allAvailableFields = new Set(context.publicFieldReturnTypes.keys());
+
+    // check availablity of union types
+    for (const [unionType, dependecyTypes] of context.unionTypes) {
+      for (const dependecyType of dependecyTypes) {
+        if (!context.publicTypeNames.has(dependecyType)) {
+          context.publicTypeNames.delete(unionType);
+          reporter(
+            `[public-introspection-filter] Type "${dependecyType}" is not marked as public.\n` +
+              ` -> The union "${unionType}" will not be marked as visible.`
+          );
+        }
       }
     }
-  }
 
-  // check availability of interface types
-  for (const [type, implementedInterfaces] of interfaceTypes) {
-    for (const interfaceName of implementedInterfaces) {
-      if (!publicTypeNames.has(interfaceName)) {
-        publicTypeNames.delete(type);
-        reporter(
-          `[public-introspection-filter] Interface "${interfaceName}" is not marked as public.\n` +
-            ` -> The type "${type}" which implements the interface will not be marked as visible.`
-        );
+    // check availability of interface types
+    for (const [type, implementedInterfaces] of context.interfaceTypes) {
+      for (const interfaceName of implementedInterfaces) {
+        if (!context.publicTypeNames.has(interfaceName)) {
+          context.publicTypeNames.delete(type);
+          reporter(
+            `[public-introspection-filter] Interface "${interfaceName}" is not marked as public.\n` +
+              ` -> The type "${type}" which implements the interface will not be marked as visible.`
+          );
+        }
       }
     }
-  }
 
-  // check availability of fields
-  for (const [fieldPath, returnType] of publicFieldReturnTypes) {
-    if (!publicTypeNames.has(returnType)) {
-      reporter(
-        `[public-introspection-filter] Type "${returnType}" is not marked as public.\n` +
-          ` -> The field "${fieldPath}" will not be marked as visible.`
-      );
-      allAvailableFields.delete(fieldPath);
-    }
-    // @TODO: if field type is an interface type:
-    // warn or strict mode --> only allow fields if all types that implement the fie
-    // what if query returns type that is not known to the client?
-  }
-
-  // check availability of input arguments
-  for (const [fieldPath, inputTypes] of publicFieldArgumentTypes) {
-    for (const inputType of inputTypes) {
-      if (!publicTypeNames.has(inputType)) {
+    // check availability of fields
+    for (const [fieldPath, returnType] of context.publicFieldReturnTypes) {
+      if (!context.publicTypeNames.has(returnType)) {
         reporter(
-          `[public-introspection-filter] Input Type "${inputType}" is not marked as public.\n` +
+          `[public-introspection-filter] Type "${returnType}" is not marked as public.\n` +
             ` -> The field "${fieldPath}" will not be marked as visible.`
         );
-        allAvailableFields.delete(fieldPath);
+        context.allAvailableFields.delete(fieldPath);
       }
+      // @TODO: if field type is an interface type:
+      // warn or strict mode --> only allow fields if all types that implement the fie
+      // what if query returns type that is not known to the client?
     }
 
-    // @TODO
-    // Required input arguments must always be public (or the Input Object type must be public.)
+    // check availability of input arguments
+    for (const [fieldPath, inputTypes] of context.publicFieldArgumentTypes) {
+      for (const inputType of inputTypes) {
+        if (!context.publicTypeNames.has(inputType)) {
+          reporter(
+            `[public-introspection-filter] Input Type "${inputType}" is not marked as public.\n` +
+              ` -> The field "${fieldPath}" will not be marked as visible.`
+          );
+          context.allAvailableFields.delete(fieldPath);
+        }
+      }
+
+      // @TODO
+      // Required input arguments must always be public (or the Input Object type must be public.)
+    }
   }
 
   const filteredSchema = makeFilteredSchema(schema, {
     type: [
-      type => {
-        return publicTypeNames.has(type.name);
+      (type, root, args, graphqlContext) => {
+        const role =
+          getRoleFromContext(graphqlContext) || DEFAULT_ACCESS_IDENTIFIER;
+        const context = getOrCreateRoleSchemaAccess(role);
+        return context.publicTypeNames.has(type.name);
       }
     ],
     directive: [directive => directive.name !== "public"],
     field: [
-      (field, root) => {
-        return allAvailableFields.has(`${root.name}.${field.name}`);
+      (field, root, args, graphqlContext) => {
+        const role =
+          getRoleFromContext(graphqlContext) || DEFAULT_ACCESS_IDENTIFIER;
+        const context = getOrCreateRoleSchemaAccess(role);
+        return context.allAvailableFields.has(`${root.name}.${field.name}`);
       }
     ]
   });
