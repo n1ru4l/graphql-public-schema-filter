@@ -47,6 +47,11 @@
     "build": "yarn build:module && yarn build:main",
     "ci:eslint": "eslint --ext .ts,.js,.tsx --ignore-path .gitignore ."
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "files": [
     "dist/**/*",
     "LICENSE",
