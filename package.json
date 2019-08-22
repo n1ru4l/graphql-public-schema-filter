@@ -1,0 +1,58 @@
+{
+  "name": "@n1ru4l/graphql-introspection-filter",
+  "version": "1.0.0",
+  "description": "Filter your GraphQL schema introspection.",
+  "license": "MIT",
+  "main": "dist/main/index.js",
+  "module": "dist/module/index.js",
+  "author": {
+    "name": "Laurin Quast",
+    "email": "laurinquast@googlemail.com",
+    "url": "https://github.com/n1ru4l"
+  },
+  "lint-staged": {
+    "*.{js}": [
+      "eslint",
+      "git add -f"
+    ],
+    "*.{js,json,css,md,ts,tsx}": [
+      "prettier --write",
+      "git add -f"
+    ]
+  },
+  "devDependencies": {
+    "@graphql-codegen/testing": "1.6.1",
+    "@types/graphql": "14.2.3",
+    "@types/jest": "24.0.18",
+    "@typescript-eslint/eslint-plugin": "2.0.0",
+    "@typescript-eslint/parser": "2.0.0",
+    "eslint": "6.2.1",
+    "eslint-config-prettier": "6.1.0",
+    "eslint-plugin-jest": "22.15.2",
+    "graphql": "14.4.2",
+    "husky": "3.0.4",
+    "jest": "24.9.0",
+    "lint-staged": "9.2.3",
+    "prettier": "1.18.2",
+    "ts-jest": "24.0.2",
+    "typescript": "3.5.3"
+  },
+  "peerDependencies": {
+    "graphql": "14.x.x"
+  },
+  "scripts": {
+    "test": "jest",
+    "build:module": "tsc --target es2017 --outDir dist/module",
+    "build:main": "tsc --target es5 --outDir dist/main",
+    "build": "yarn build:module && yarn build:main",
+    "ci:eslint": "eslint --ext .ts,.js,.tsx --ignore-path .gitignore ."
+  },
+  "files": [
+    "dist/**/*",
+    "LICENSE",
+    "README.md"
+  ],
+  "dependencies": {
+    "graphql-introspection-filtering": "1.0.1"
+  }
+}
