@@ -114,11 +114,13 @@ type GraphQLTypeObject =
   | InputObjectTypeDefinitionNode
   | InputObjectTypeExtensionNode;
 
+type ExecActionForRoleContextFunction = (roleContext: RoleContext) => void;
+
 export const makePublicIntrospectionFilter = (
   schema: GraphQLSchema,
   typeDefs: string,
   options?: MakePublicIntrospectionFilterOptions
-): GraphQLSchema => {
+): { schema: GraphQLSchema; roles: string[] } => {
   const reporter = (options && options.reporter) || defaultReporter;
 
   const getRoleFromContext =
@@ -185,6 +187,44 @@ export const makePublicIntrospectionFilter = (
         )
       : null;
 
+  const runActionForRoleDirective = (
+    directive: DirectiveNode,
+    execActionForRoleContext: ExecActionForRoleContextFunction
+  ) => {
+    const roleAttribute = getRoleAttribute(directive);
+
+    if (
+      roleAttribute &&
+      roleAttribute.value.kind === "ListValue" &&
+      roleAttribute.value.values.length
+    ) {
+      for (const roleAttributeValue of roleAttribute.value.values) {
+        if (
+          roleAttributeValue.kind === "StringValue" ||
+          roleAttributeValue.kind === "EnumValue"
+        ) {
+          const roleContext = getOrCreateRoleSchemaAccess(
+            roleAttributeValue.value
+          );
+          execActionForRoleContext(roleContext);
+        }
+      }
+    } else {
+      const roleContext = getOrCreateRoleSchemaAccess(
+        DEFAULT_ACCESS_IDENTIFIER
+      );
+      execActionForRoleContext(roleContext);
+    }
+  };
+
+  const runActionForRoleDirectives = (
+    directives: DirectiveNode[],
+    execActionForRoleContext: ExecActionForRoleContextFunction
+  ) => {
+    for (const directive of directives) {
+      runActionForRoleDirective(directive, execActionForRoleContext);
+    }
+  };
   const ast = parse(typeDefs);
 
   const handleObject = (
@@ -203,74 +243,28 @@ export const makePublicIntrospectionFilter = (
     ];
 
     if (objectAndObjectFieldDirectives.length) {
-      for (const directive of objectAndObjectFieldDirectives) {
-        const execActionForRoleContext = (roleContext: RoleContext) => {
+      runActionForRoleDirectives(
+        objectAndObjectFieldDirectives,
+        roleContext => {
           roleContext.publicTypeNames.add(type.name.value);
-        };
-        const roleAttribute = getRoleAttribute(directive);
-
-        if (
-          roleAttribute &&
-          roleAttribute.value.kind === "ListValue" &&
-          roleAttribute.value.values.length
-        ) {
-          for (const roleAttributeValue of roleAttribute.value.values) {
-            if (
-              roleAttributeValue.kind === "StringValue" ||
-              roleAttributeValue.kind === "EnumValue"
-            ) {
-              const roleContext = getOrCreateRoleSchemaAccess(
-                roleAttributeValue.value
-              );
-              execActionForRoleContext(roleContext);
-            }
-          }
-        } else {
-          const roleContext = getOrCreateRoleSchemaAccess(
-            DEFAULT_ACCESS_IDENTIFIER
-          );
-          execActionForRoleContext(roleContext);
         }
-      }
+      );
 
       if (
         (type.kind === "ObjectTypeDefinition" ||
           type.kind === "ObjectTypeExtension") &&
         type.interfaces
       ) {
-        for (const directive of objectAndObjectFieldDirectives) {
-          const execActionForRoleContext = (roleContext: RoleContext) => {
+        runActionForRoleDirectives(
+          objectAndObjectFieldDirectives,
+          roleContext => {
             if (!type.interfaces) return;
             roleContext.interfaceTypes.set(
               type.name.value,
               type.interfaces.map(inter => inter.name.value)
             );
-          };
-          const roleAttribute = getRoleAttribute(directive);
-
-          if (
-            roleAttribute &&
-            roleAttribute.value.kind === "ListValue" &&
-            roleAttribute.value.values.length
-          ) {
-            for (const roleAttributeValue of roleAttribute.value.values) {
-              if (
-                roleAttributeValue.kind === "StringValue" ||
-                roleAttributeValue.kind === "EnumValue"
-              ) {
-                const roleContext = getOrCreateRoleSchemaAccess(
-                  roleAttributeValue.value
-                );
-                execActionForRoleContext(roleContext);
-              }
-            }
-          } else {
-            const roleContext = getOrCreateRoleSchemaAccess(
-              DEFAULT_ACCESS_IDENTIFIER
-            );
-            execActionForRoleContext(roleContext);
           }
-        }
+        );
       }
 
       visit(type, {
@@ -278,86 +272,40 @@ export const makePublicIntrospectionFilter = (
           enter: (field /*, key, parent, path*/) => {
             const fieldPublicDirectives = findAllDirectivesForField(field);
             if (objectDirectives.length || fieldPublicDirectives.length) {
-              for (const directive of objectAndObjectFieldDirectives) {
-                const execActionForRoleContext = (roleContext: RoleContext) => {
+              runActionForRoleDirectives(
+                objectAndObjectFieldDirectives,
+                roleContext => {
                   roleContext.publicFieldReturnTypes.set(
                     `${type.name.value}.${field.name.value}`,
                     getWrappedTypeName(field.type)
                   );
-                };
-                const roleAttribute = getRoleAttribute(directive);
-
-                if (
-                  roleAttribute &&
-                  roleAttribute.value.kind === "ListValue" &&
-                  roleAttribute.value.values.length
-                ) {
-                  for (const roleAttributeValue of roleAttribute.value.values) {
-                    if (
-                      roleAttributeValue.kind === "StringValue" ||
-                      roleAttributeValue.kind === "EnumValue"
-                    ) {
-                      const roleContext = getOrCreateRoleSchemaAccess(
-                        roleAttributeValue.value
-                      );
-                      execActionForRoleContext(roleContext);
-                    }
-                  }
-                } else {
-                  const roleContext = getOrCreateRoleSchemaAccess(
-                    DEFAULT_ACCESS_IDENTIFIER
-                  );
-                  execActionForRoleContext(roleContext);
                 }
-              }
+              );
             }
           }
         },
         FieldDefinition: {
           enter: (field /*, key, parent, path*/) => {
             const fieldPublicDirectives = findAllDirectivesForField(field);
-            if (objectDirectives.length || fieldPublicDirectives.length) {
-              for (const directive of objectAndObjectFieldDirectives) {
-                const execActionForRoleContext = (roleContext: RoleContext) => {
-                  roleContext.publicFieldReturnTypes.set(
+            runActionForRoleDirectives(
+              fieldPublicDirectives.length === 0
+                ? objectDirectives
+                : fieldPublicDirectives,
+              roleContext => {
+                roleContext.publicFieldReturnTypes.set(
+                  `${type.name.value}.${field.name.value}`,
+                  getWrappedTypeName(field.type)
+                );
+                if (field.arguments) {
+                  roleContext.publicFieldArgumentTypes.set(
                     `${type.name.value}.${field.name.value}`,
-                    getWrappedTypeName(field.type)
+                    field.arguments.map(argument =>
+                      getWrappedTypeName(argument.type)
+                    )
                   );
-                  if (field.arguments) {
-                    roleContext.publicFieldArgumentTypes.set(
-                      `${type.name.value}.${field.name.value}`,
-                      field.arguments.map(argument =>
-                        getWrappedTypeName(argument.type)
-                      )
-                    );
-                  }
-                };
-                const roleAttribute = getRoleAttribute(directive);
-
-                if (
-                  roleAttribute &&
-                  roleAttribute.value.kind === "ListValue" &&
-                  roleAttribute.value.values.length
-                ) {
-                  for (const roleAttributeValue of roleAttribute.value.values) {
-                    if (
-                      roleAttributeValue.kind === "StringValue" ||
-                      roleAttributeValue.kind === "EnumValue"
-                    ) {
-                      const roleContext = getOrCreateRoleSchemaAccess(
-                        roleAttributeValue.value
-                      );
-                      execActionForRoleContext(roleContext);
-                    }
-                  }
-                } else {
-                  const roleContext = getOrCreateRoleSchemaAccess(
-                    DEFAULT_ACCESS_IDENTIFIER
-                  );
-                  execActionForRoleContext(roleContext);
                 }
               }
-            }
+            );
           }
         }
       });
@@ -370,37 +318,9 @@ export const makePublicIntrospectionFilter = (
     ScalarTypeDefinition: {
       enter: scalar => {
         const scalarDirectiveNodes = findAllObjectDirectives(scalar);
-        if (scalarDirectiveNodes.length) {
-          for (const directive of scalarDirectiveNodes) {
-            const execActionForRoleContext = (roleContext: RoleContext) => {
-              roleContext.publicTypeNames.add(scalar.name.value);
-            };
-            const roleAttribute = getRoleAttribute(directive);
-
-            if (
-              roleAttribute &&
-              roleAttribute.value.kind === "ListValue" &&
-              roleAttribute.value.values.length
-            ) {
-              for (const roleAttributeValue of roleAttribute.value.values) {
-                if (
-                  roleAttributeValue.kind === "StringValue" ||
-                  roleAttributeValue.kind === "EnumValue"
-                ) {
-                  const roleContext = getOrCreateRoleSchemaAccess(
-                    roleAttributeValue.value
-                  );
-                  execActionForRoleContext(roleContext);
-                }
-              }
-            } else {
-              const roleContext = getOrCreateRoleSchemaAccess(
-                DEFAULT_ACCESS_IDENTIFIER
-              );
-              execActionForRoleContext(roleContext);
-            }
-          }
-        }
+        runActionForRoleDirectives(scalarDirectiveNodes, roleContext => {
+          roleContext.publicTypeNames.add(scalar.name.value);
+        });
       }
     },
     ObjectTypeExtension: {
@@ -416,80 +336,24 @@ export const makePublicIntrospectionFilter = (
     EnumTypeDefinition: {
       enter: type => {
         const typeDirectiveNodes = findAllObjectDirectives(type);
-        if (typeDirectiveNodes.length) {
-          for (const directive of typeDirectiveNodes) {
-            const execActionForRoleContext = (roleContext: RoleContext) => {
-              roleContext.publicTypeNames.add(type.name.value);
-            };
-            const roleAttribute = getRoleAttribute(directive);
-
-            if (
-              roleAttribute &&
-              roleAttribute.value.kind === "ListValue" &&
-              roleAttribute.value.values.length
-            ) {
-              for (const roleAttributeValue of roleAttribute.value.values) {
-                if (
-                  roleAttributeValue.kind === "StringValue" ||
-                  roleAttributeValue.kind === "EnumValue"
-                ) {
-                  const roleContext = getOrCreateRoleSchemaAccess(
-                    roleAttributeValue.value
-                  );
-                  execActionForRoleContext(roleContext);
-                }
-              }
-            } else {
-              const roleContext = getOrCreateRoleSchemaAccess(
-                DEFAULT_ACCESS_IDENTIFIER
-              );
-              execActionForRoleContext(roleContext);
-            }
-          }
-        }
+        runActionForRoleDirectives(typeDirectiveNodes, roleContext => {
+          roleContext.publicTypeNames.add(type.name.value);
+        });
         return false;
       }
     },
     UnionTypeDefinition: {
       enter: type => {
         const unionDirectives = findAllObjectDirectives(type);
-        if (unionDirectives.length) {
-          for (const directive of unionDirectives) {
-            const execActionForRoleContext = (roleContext: RoleContext) => {
-              roleContext.publicTypeNames.add(type.name.value);
-              if (type.types) {
-                roleContext.unionTypes.set(
-                  type.name.value,
-                  type.types.map(type => type.name.value)
-                );
-              }
-            };
-            const roleAttribute = getRoleAttribute(directive);
-
-            if (
-              roleAttribute &&
-              roleAttribute.value.kind === "ListValue" &&
-              roleAttribute.value.values.length
-            ) {
-              for (const roleAttributeValue of roleAttribute.value.values) {
-                if (
-                  roleAttributeValue.kind === "StringValue" ||
-                  roleAttributeValue.kind === "EnumValue"
-                ) {
-                  const roleContext = getOrCreateRoleSchemaAccess(
-                    roleAttributeValue.value
-                  );
-                  execActionForRoleContext(roleContext);
-                }
-              }
-            } else {
-              const roleContext = getOrCreateRoleSchemaAccess(
-                DEFAULT_ACCESS_IDENTIFIER
-              );
-              execActionForRoleContext(roleContext);
-            }
+        runActionForRoleDirectives(unionDirectives, roleContext => {
+          roleContext.publicTypeNames.add(type.name.value);
+          if (type.types) {
+            roleContext.unionTypes.set(
+              type.name.value,
+              type.types.map(type => type.name.value)
+            );
           }
-        }
+        });
 
         return false;
       }
@@ -582,7 +446,7 @@ export const makePublicIntrospectionFilter = (
         return context.publicTypeNames.has(type.name);
       }
     ],
-    directive: [directive => directive.name !== "public"],
+    directive: [directive => directive.name !== directiveName],
     field: [
       (field, root, args, graphqlContext) => {
         const role =
@@ -593,5 +457,7 @@ export const makePublicIntrospectionFilter = (
     ]
   });
 
-  return filteredSchema;
+  const roles = Array.from(roleSchemaAccess.keys());
+
+  return { schema: filteredSchema, roles };
 };
