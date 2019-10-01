@@ -1,4 +1,4 @@
-import { getFilteredSchemaSdlPerRole } from "./get-filtered-schema-sdl-per-role";
+import { filterSchemaDefinitionPerRole } from "./filter-schema-definition-per-role";
 import { createPublicDirectiveTypeDefs } from "./graphql-introspection-filter";
 
 it("can create schema for different roles", () => {
@@ -11,7 +11,7 @@ it("can create schema for different roles", () => {
     ${createPublicDirectiveTypeDefs()}
   `;
 
-  const result = getFilteredSchemaSdlPerRole(typeDefs, {
+  const result = filterSchemaDefinitionPerRole(typeDefs, {
     reporter: () => {}
   });
 
