@@ -298,12 +298,6 @@ export const makePublicIntrospectionFilter = (
             const fieldPublicDirectives = findAllDirectivesForField(field);
             if (objectDirectives.length || fieldPublicDirectives.length) {
               allInputTypes.add(getWrappedTypeName(field.type));
-              // runActionForRoleDirectives(
-              //   objectAndObjectFieldDirectives,
-              //   roleContext => {
-
-              //   }
-              // );
             }
           }
         },
