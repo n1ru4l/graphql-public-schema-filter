@@ -74,13 +74,15 @@ const colorReset = "\x1b[0m";
 export type Reporter = (message: string) => void;
 
 const defaultReporter: Reporter = (text: string) =>
-  console.warn(`${colorYellow}${text}${colorReset}`);
+  console.warn(
+    `${colorYellow}[public-introspection-filter]: ${text}${colorReset}`
+  );
 
 export type GetRoleFromContext = (
   graphqlContext: unknown
 ) => string | null | void;
 
-interface MakePublicIntrospectionFilterOptions {
+export interface MakePublicIntrospectionFilterOptions {
   reporter?: Reporter;
   getRoleFromContext?: GetRoleFromContext;
   directiveName?: string;
@@ -122,6 +124,7 @@ export const makePublicIntrospectionFilter = (
   options?: MakePublicIntrospectionFilterOptions
 ): { schema: GraphQLSchema; roles: string[] } => {
   const reporter = (options && options.reporter) || defaultReporter;
+  const reports: string[] = [];
 
   const getRoleFromContext =
     (options && options.getRoleFromContext) ||
@@ -376,7 +379,7 @@ export const makePublicIntrospectionFilter = (
   });
 
   for (const [roleName, context] of roleSchemaAccess.entries()) {
-    reporter(`VALIDATION FOR ROLE "${roleName}"`);
+    reports.push(`VALIDATION FOR ROLE "${roleName}"`);
 
     context.allAvailableFields = new Set(context.publicFieldReturnTypes.keys());
 
@@ -385,8 +388,8 @@ export const makePublicIntrospectionFilter = (
       for (const dependecyType of dependecyTypes) {
         if (!context.publicTypeNames.has(dependecyType)) {
           context.publicTypeNames.delete(unionType);
-          reporter(
-            `[public-introspection-filter] Type "${dependecyType}" is not marked as public.\n` +
+          reports.push(
+            `Type "${dependecyType}" is not marked as public.\n` +
               ` -> The union "${unionType}" will not be marked as visible.`
           );
         }
@@ -398,8 +401,8 @@ export const makePublicIntrospectionFilter = (
       for (const interfaceName of implementedInterfaces) {
         if (!context.publicTypeNames.has(interfaceName)) {
           context.publicTypeNames.delete(type);
-          reporter(
-            `[public-introspection-filter] Interface "${interfaceName}" is not marked as public.\n` +
+          reports.push(
+            `Interface "${interfaceName}" is not marked as public.\n` +
               ` -> The type "${type}" which implements the interface will not be marked as visible.`
           );
         }
@@ -409,15 +412,12 @@ export const makePublicIntrospectionFilter = (
     // check availability of fields
     for (const [fieldPath, returnType] of context.publicFieldReturnTypes) {
       if (!context.publicTypeNames.has(returnType)) {
-        reporter(
-          `[public-introspection-filter] Type "${returnType}" is not marked as public.\n` +
+        reports.push(
+          `Type "${returnType}" is not marked as public.\n` +
             ` -> The field "${fieldPath}" will not be marked as visible.`
         );
         context.allAvailableFields.delete(fieldPath);
       }
-      // @TODO: if field type is an interface type:
-      // warn or strict mode --> only allow fields if all types that implement the fie
-      // what if query returns type that is not known to the client?
     }
 
     // check availability of input arguments
@@ -425,7 +425,7 @@ export const makePublicIntrospectionFilter = (
       for (const inputType of inputTypes) {
         if (!context.publicTypeNames.has(inputType)) {
           reporter(
-            `[public-introspection-filter] Input Type "${inputType}" is not marked as public.\n` +
+            `Input Type "${inputType}" is not marked as public.\n` +
               ` -> The field "${fieldPath}" will not be marked as visible.`
           );
           context.allAvailableFields.delete(fieldPath);
@@ -458,6 +458,10 @@ export const makePublicIntrospectionFilter = (
   });
 
   const roles = Array.from(roleSchemaAccess.keys());
+
+  for (const message of reports) {
+    reporter(message);
+  }
 
   return { schema: filteredSchema, roles };
 };
