@@ -16,7 +16,13 @@ import {
   ScalarTypeDefinitionNode,
   EnumTypeDefinitionNode,
   UnionTypeDefinitionNode,
-  ArgumentNode
+  ArgumentNode,
+  isInputObjectType,
+  GraphQLInputType,
+  isListType,
+  isNonNullType,
+  GraphQLList,
+  GraphQLNonNull
 } from "graphql";
 
 const BASIC_TYPES = [
@@ -68,6 +74,17 @@ const getWrappedTypeName = (type: TypeNode): string => {
   throw new TypeError("Invalid input");
 };
 
+const getWrappedInputType = (type: GraphQLInputType) => {
+  if (isListType(type) || isNonNullType(type)) {
+    return type.ofType as Exclude<
+      GraphQLInputType,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      GraphQLNonNull<any> | GraphQLList<any>
+    >;
+  }
+  return type;
+};
+
 const colorYellow = "\x1b[33m";
 const colorReset = "\x1b[0m";
 
@@ -94,6 +111,7 @@ interface RoleContext {
   publicFieldReturnTypes: Map<string, string>;
   publicFieldArgumentTypes: Map<string, string[]>;
   unionTypes: Map<string, string[]>;
+  inputTypes: Set<string>;
   interfaceTypes: Map<string, string[]>;
   allAvailableFields: Set<string>;
 }
@@ -104,6 +122,7 @@ const createRoleContext = (): RoleContext => ({
   publicFieldArgumentTypes: new Map(),
   unionTypes: new Map(),
   interfaceTypes: new Map(),
+  inputTypes: new Set(),
   allAvailableFields: new Set()
 });
 
@@ -230,13 +249,16 @@ export const makePublicIntrospectionFilter = (
   };
   const ast = parse(typeDefs);
 
+  const allInputTypes = new Set<string>();
+
   const handleObject = (
     type:
       | ObjectTypeExtensionNode
       | ObjectTypeDefinitionNode
       | InterfaceTypeDefinitionNode
       | InputObjectTypeDefinitionNode
-      | InputObjectTypeExtensionNode
+      | InputObjectTypeExtensionNode,
+    isInputType = false
   ) => {
     const objectDirectives = findAllObjectDirectives(type);
     const objectFieldDirectives = findAllObjectFieldDirectives(type);
@@ -275,21 +297,24 @@ export const makePublicIntrospectionFilter = (
           enter: (field /*, key, parent, path*/) => {
             const fieldPublicDirectives = findAllDirectivesForField(field);
             if (objectDirectives.length || fieldPublicDirectives.length) {
-              runActionForRoleDirectives(
-                objectAndObjectFieldDirectives,
-                roleContext => {
-                  roleContext.publicFieldReturnTypes.set(
-                    `${type.name.value}.${field.name.value}`,
-                    getWrappedTypeName(field.type)
-                  );
-                }
-              );
+              allInputTypes.add(getWrappedTypeName(field.type));
+              // runActionForRoleDirectives(
+              //   objectAndObjectFieldDirectives,
+              //   roleContext => {
+
+              //   }
+              // );
             }
           }
         },
         FieldDefinition: {
           enter: (field /*, key, parent, path*/) => {
             const fieldPublicDirectives = findAllDirectivesForField(field);
+
+            if (isInputType) {
+              allInputTypes.add(getWrappedTypeName(field.type));
+            }
+
             runActionForRoleDirectives(
               fieldPublicDirectives.length === 0
                 ? objectDirectives
@@ -299,12 +324,14 @@ export const makePublicIntrospectionFilter = (
                   `${type.name.value}.${field.name.value}`,
                   getWrappedTypeName(field.type)
                 );
+
                 if (field.arguments) {
+                  const types = field.arguments.map(argument =>
+                    getWrappedTypeName(argument.type)
+                  );
                   roleContext.publicFieldArgumentTypes.set(
                     `${type.name.value}.${field.name.value}`,
-                    field.arguments.map(argument =>
-                      getWrappedTypeName(argument.type)
-                    )
+                    types
                   );
                 }
               }
@@ -368,12 +395,14 @@ export const makePublicIntrospectionFilter = (
     },
     InputObjectTypeDefinition: {
       enter: type => {
-        return handleObject(type);
+        allInputTypes.add(type.name.value);
+        return handleObject(type, true);
       }
     },
     InputObjectTypeExtension: {
       enter: type => {
-        return handleObject(type);
+        allInputTypes.add(type.name.value);
+        return handleObject(type, true);
       }
     }
   });
@@ -409,6 +438,47 @@ export const makePublicIntrospectionFilter = (
       }
     }
 
+    const filterInputTypes = (remainingInputTypes: Set<string>) => {
+      for (const inputTypeName of remainingInputTypes) {
+        const type = schema.getType(inputTypeName);
+        if (!type) {
+          throw new Error("Invaid state.");
+        }
+
+        if (isInputObjectType(type)) {
+          const fields = type.getFields();
+
+          const namesOfReferencesThatAreNotPublic = Object.values(fields)
+            .map(field => getWrappedInputType(field.type))
+            .filter(isInputObjectType)
+            .map(type => type.name)
+            .filter(name => !context.publicTypeNames.has(name));
+
+          if (namesOfReferencesThatAreNotPublic.length) {
+            let firstLine = `The type "${namesOfReferencesThatAreNotPublic[0]}" is not public`;
+
+            if (namesOfReferencesThatAreNotPublic.length > 1) {
+              firstLine = `The type(s) ${namesOfReferencesThatAreNotPublic
+                .map(name => `"${name}"`)
+                .join(", ")} are not public`;
+            }
+            reports.push(
+              `${firstLine}, but referenced by the input type "${type.name}".\n` +
+                ` -> The input type "${type}" will not be marked as visible.`
+            );
+
+            if (context.publicTypeNames.delete(type.name)) {
+              const clone = new Set(remainingInputTypes);
+              clone.delete(type.name);
+              filterInputTypes(clone);
+            }
+          }
+        }
+      }
+    };
+
+    filterInputTypes(new Set(allInputTypes));
+
     // check availability of fields
     for (const [fieldPath, returnType] of context.publicFieldReturnTypes) {
       if (!context.publicTypeNames.has(returnType)) {
@@ -424,16 +494,13 @@ export const makePublicIntrospectionFilter = (
     for (const [fieldPath, inputTypes] of context.publicFieldArgumentTypes) {
       for (const inputType of inputTypes) {
         if (!context.publicTypeNames.has(inputType)) {
-          reporter(
-            `Input Type "${inputType}" is not marked as public.\n` +
+          reports.push(
+            `Input Type "${inputType}" is not marked as public but referenced by the field "${fieldPath}"\n` +
               ` -> The field "${fieldPath}" will not be marked as visible.`
           );
           context.allAvailableFields.delete(fieldPath);
         }
       }
-
-      // @TODO
-      // Required input arguments must always be public (or the Input Object type must be public.)
     }
   }
 
