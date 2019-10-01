@@ -12,13 +12,13 @@ import {
 } from "graphql";
 import { fromEntries } from "./from-entries";
 
-interface GetFilteredSchemaSdlPerRoleOptions {
+interface FilterSchemaDefinitionPerRoleOptions {
   reporter?: Reporter;
 }
 
-export const getFilteredSchemaSdlPerRole = (
+export const filterSchemaDefinitionPerRole = (
   typeDefs: string,
-  options?: GetFilteredSchemaSdlPerRoleOptions
+  options?: FilterSchemaDefinitionPerRoleOptions
 ) => {
   const inputSchema = buildSchema(typeDefs);
   let contextRole: string;

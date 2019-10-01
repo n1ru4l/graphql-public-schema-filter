@@ -1,1 +1,1 @@
-export * from "./get-filtered-schema-sdl-per-role";
+export * from "./filter-schema-definition-per-role";
