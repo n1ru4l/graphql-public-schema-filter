@@ -1,7 +1,9 @@
 import "@graphql-codegen/testing";
 import {
   makePublicIntrospectionFilter,
-  createPublicDirectiveTypeDefs
+  createPublicDirectiveTypeDefs,
+  MakePublicIntrospectionFilterOptions,
+  Reporter
 } from "./graphql-introspection-filter";
 import {
   buildSchema,
@@ -20,6 +22,12 @@ const printIntrospectionSdl = async (filteredSchema: GraphQLSchema) => {
   );
 
   return generatedSchema;
+};
+
+const noopReporter: Reporter = () => {};
+
+const defaultOptions: MakePublicIntrospectionFilterOptions = {
+  reporter: noopReporter
 };
 
 it("can be called", async () => {
@@ -41,7 +49,8 @@ it("can be called", async () => {
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
   const sdl = await printIntrospectionSdl(filteredSchema);
 
@@ -78,6 +87,7 @@ it("does not expose the public directive", async () => {
     schema,
     typeDefs,
     {
+      ...defaultOptions,
       directiveArgumentName: "AccessRole"
     }
   );
@@ -105,7 +115,8 @@ it("makes type public when its field is public", async () => {
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
   const sdl = await printIntrospectionSdl(filteredSchema);
 
@@ -139,7 +150,8 @@ it("makes fields public when type is public", async () => {
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
   const sdl = await printIntrospectionSdl(filteredSchema);
 
@@ -174,7 +186,8 @@ it("what if type is not public", async () => {
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
 
   const sdl = await printIntrospectionSdl(filteredSchema);
@@ -211,7 +224,8 @@ it("does not make unions public when type is not public", async () => {
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
 
   const sdl = await printIntrospectionSdl(filteredSchema);
@@ -248,7 +262,8 @@ it("makes unions public when type is public", async () => {
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
   const sdl = await printIntrospectionSdl(filteredSchema);
 
@@ -300,7 +315,8 @@ it("hides field/type if its interface is public", async () => {
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
   const sdl = await printIntrospectionSdl(filteredSchema);
 
@@ -340,7 +356,8 @@ it("exposes field/type if its interface is public", async () => {
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
   const sdl = await printIntrospectionSdl(filteredSchema);
 
@@ -374,7 +391,8 @@ it("hides mutation with input types that are not marked as public", async () => 
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
   const sdl = await printIntrospectionSdl(filteredSchema);
 
@@ -411,7 +429,8 @@ it("shows mutation with input types that are marked as public", async () => {
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
   const sdl = await printIntrospectionSdl(filteredSchema);
 
@@ -451,7 +470,8 @@ it("exposes Scalars correctly", async () => {
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
   const sdl = await printIntrospectionSdl(filteredSchema);
 
@@ -487,7 +507,8 @@ it("roles: empty role list on field -> field is added to default context", async
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
   const sdl = await printIntrospectionSdl(filteredSchema);
 
@@ -523,7 +544,8 @@ it("roles: empty role list on scalar -> scalar is added to default context", asy
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
   const sdl = await printIntrospectionSdl(filteredSchema);
 
@@ -560,7 +582,8 @@ it("roles: empty role list on enum -> enum is added to the default context", asy
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
   const sdl = await printIntrospectionSdl(filteredSchema);
 
@@ -601,7 +624,8 @@ it("roles: empty role list on union -> union is added to default context", async
 
   const { schema: filteredSchema } = makePublicIntrospectionFilter(
     schema,
-    typeDefs
+    typeDefs,
+    defaultOptions
   );
   const sdl = await printIntrospectionSdl(filteredSchema);
 
@@ -644,6 +668,7 @@ it("roles: restrict field for specific role", async () => {
     schema,
     typeDefs,
     {
+      ...defaultOptions,
       getRoleFromContext: () => currentRole
     }
   );

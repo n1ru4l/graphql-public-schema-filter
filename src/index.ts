@@ -1,1 +1,1 @@
-export * from "./graphql-introspection-filter";
+export * from "./get-filtered-schema-sdl-per-role";

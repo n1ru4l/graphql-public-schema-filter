@@ -1,4 +1,7 @@
-import { makePublicIntrospectionFilter } from "./graphql-introspection-filter";
+import {
+  makePublicIntrospectionFilter,
+  Reporter
+} from "./graphql-introspection-filter";
 import {
   buildSchema,
   graphqlSync,
@@ -7,14 +10,23 @@ import {
   buildClientSchema,
   IntrospectionQuery
 } from "graphql";
+import { fromEntries } from "./from-entries";
 
-export const getFilteredSchemaSdlPerRole = (typeDefs: string) => {
+interface GetFilteredSchemaSdlPerRoleOptions {
+  reporter?: Reporter;
+}
+
+export const getFilteredSchemaSdlPerRole = (
+  typeDefs: string,
+  options?: GetFilteredSchemaSdlPerRoleOptions
+) => {
   const inputSchema = buildSchema(typeDefs);
   let contextRole: string;
   const { schema, roles } = makePublicIntrospectionFilter(
     inputSchema,
     typeDefs,
     {
+      ...options,
       getRoleFromContext: () => contextRole
     }
   );
@@ -29,5 +41,5 @@ export const getFilteredSchemaSdlPerRole = (typeDefs: string) => {
     results.set(role, result);
   }
 
-  return results;
+  return fromEntries(results.entries());
 };

@@ -11,6 +11,12 @@ it("can create schema for different roles", () => {
     ${createPublicDirectiveTypeDefs()}
   `;
 
-  const result = getFilteredSchemaSdlPerRole(typeDefs);
-  console.log(result);
+  const result = getFilteredSchemaSdlPerRole(typeDefs, {
+    reporter: () => {}
+  });
+
+  expect(result).toEqual({
+    DEFAULT: `type Query {\n  foo: String!\n}\n`,
+    ROLE_1: `type Query {\n  foo: String!\n  secret: String!\n}\n`
+  });
 });
