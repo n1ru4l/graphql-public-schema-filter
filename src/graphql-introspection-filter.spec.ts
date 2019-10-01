@@ -450,6 +450,85 @@ it("shows mutation with input types that are marked as public", async () => {
   `);
 });
 
+it("hides mutations with nested input types that are not public", async () => {
+  const typeDefs = /* GraphQL */ `
+    input B @public {
+      lel: String!
+      a: A!
+    }
+
+    input A {
+      foo: String!
+    }
+
+    type Query @public {
+      asas(lol: A!): String!
+      lelb(b: B!): String!
+      a: String!
+    }
+
+    ${createPublicDirectiveTypeDefs()}
+  `;
+
+  const schema = buildSchema(typeDefs);
+
+  const { schema: filteredSchema } = makePublicIntrospectionFilter(
+    schema,
+    typeDefs,
+    { ...defaultOptions }
+  );
+
+  const sdl = await printIntrospectionSdl(filteredSchema);
+
+  expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
+    type Query {
+      a: String!
+    }
+  `);
+});
+
+it("hides mutations with nested input types that are not public (more than two levels)", async () => {
+  const typeDefs = /* GraphQL */ `
+    input B @public {
+      lel: String!
+      a: A!
+    }
+
+    input A @public {
+      foo: String!
+      c: C!
+    }
+
+    input C {
+      lel: String!
+    }
+
+    type Query @public {
+      asas(lol: A!): String!
+      lelb(b: B!): String!
+      a: String!
+    }
+
+    ${createPublicDirectiveTypeDefs()}
+  `;
+
+  const schema = buildSchema(typeDefs);
+
+  const { schema: filteredSchema } = makePublicIntrospectionFilter(
+    schema,
+    typeDefs,
+    { ...defaultOptions, reporter: console.warn }
+  );
+
+  const sdl = await printIntrospectionSdl(filteredSchema);
+
+  expect(sdl).toBeSimilarStringTo(/* GraphQL */ `
+    type Query {
+      a: String!
+    }
+  `);
+});
+
 it("exposes Scalars correctly", async () => {
   const typeDefs = /* GraphQL */ `
     scalar Upload @public
