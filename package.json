@@ -1,6 +1,6 @@
 {
   "name": "@n1ru4l/graphql-schema-filter",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "Filter your GraphQL schema introspection.",
   "license": "MIT",
   "main": "dist/main/index.js",
@@ -49,7 +49,7 @@
     "ci:eslint": "eslint --ext .ts,.js,.tsx --ignore-path .gitignore ."
   },
   "bin": {
-    "filter-graphql-schema": "./dist/cli/cli.js"
+    "filter-graphql-schema": "./dist/main/cli/cli.js"
   },
   "husky": {
     "hooks": {
