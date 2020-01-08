@@ -1,6 +1,6 @@
 {
   "name": "@n1ru4l/graphql-schema-filter",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "Filter your GraphQL schema introspection.",
   "license": "MIT",
   "main": "dist/main/index.js",
