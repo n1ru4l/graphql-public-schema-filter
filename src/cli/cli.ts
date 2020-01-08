@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 import path from "path";
 import fs from "fs";
-import pkg from "../../package.json";
 import { filterSchemaDefinitionPerRole } from "../filter-schema-definition-per-role";
 
-console.log(`@n1ru4l/graphql-schema-filter v${pkg.version}`);
+console.log(`@n1ru4l/graphql-schema-filter`);
 
 const [, , command = "help"] = process.argv;
 switch (command) {
