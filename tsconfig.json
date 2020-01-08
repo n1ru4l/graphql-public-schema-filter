@@ -9,6 +9,6 @@
     "lib": ["es2019"],
     "resolveJsonModule": true
   },
-  "include": ["src", "types"],
+  "include": ["src/**/*.ts"],
   "exclude": ["./**/*.spec.ts", "dist"]
 }
