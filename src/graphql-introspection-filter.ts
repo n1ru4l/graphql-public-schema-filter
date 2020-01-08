@@ -1,3 +1,4 @@
+/// <reference types="./graphql-introspection-filtering" />
 import makeFilteredSchema from "graphql-introspection-filtering";
 import {
   GraphQLSchema,
