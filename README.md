@@ -92,6 +92,10 @@ const publicSchema = buildPublicSchema(privateSchema);
 
 ## FAQ
 
+### Why `isPublic` and `@public` over `isPrivate` and `@private`
+
+Deny-listing is more prone to errors than allow-listing. By adding a directive/extension field we explicitly set something to public. The other way around it is easier to forgot to add a `@private`/ `isPrivate` annotation, which would automatically result in the new fields being public. Being verbose about what fields are public is the safest way.
+
 ### Why is the no more granular control that allows building multiple unique public schemas?
 
 I considered this at the beginning, but in practice we never had a use for this. Having multiple public schemas requires maintaining a lot of documentation. In our use-case we only have a public and a private schema. There is still role based access for the public schema. certain users are not allowed to select specific fields. Instead of hiding those fields for those users we instead deny operations that select fields the users are not allowed to select before even executing it with the [envelop `useOperationFieldPermissions` plugin](https://www.envelop.dev/plugins/use-operation-field-permissions).
