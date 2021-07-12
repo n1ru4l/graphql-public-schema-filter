@@ -5,5 +5,6 @@
     "javascriptreact",
     "typescript",
     "typescriptreact"
-  ]
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

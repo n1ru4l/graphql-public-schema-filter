@@ -1,1 +1,3 @@
-export * from "./filter-schema-definition-per-role";
+export { buildPublicSchema } from "./public-schema-filter";
+export { directiveToExtensionsTransform } from "./public-schema-filter";
+export * from "./public-directive";
