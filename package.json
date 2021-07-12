@@ -3,8 +3,22 @@
   "version": "0.0.0",
   "description": "Filter your GraphQL schema into a public schema.",
   "license": "MIT",
-  "main": "dist/main/index.js",
-  "module": "dist/module/index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./*": {
+      "require": "./dist/*.js",
+      "import": "./dist/*.mjs"
+    }
+  },
+  "typings": "dist/index.d.ts",
+  "typescript": {
+    "definition": "dist/index.d.ts"
+  },
   "author": {
     "name": "Laurin Quast",
     "email": "laurinquast@googlemail.com",
@@ -41,9 +55,7 @@
   },
   "scripts": {
     "test": "jest",
-    "build:module": "tsc --target es2017 --outDir dist/module",
-    "build:main": "tsc --target es5 --outDir dist/main",
-    "build": "yarn build:module && yarn build:main",
+    "build": "tsc && bob build --single",
     "ci:eslint": "eslint --ext .ts,.js,.tsx --ignore-path .gitignore ."
   },
   "husky": {
@@ -58,5 +70,9 @@
   ],
   "dependencies": {
     "@graphql-tools/utils": "^7.10.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist"
   }
 }

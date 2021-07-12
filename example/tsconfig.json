@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "typeRoots": ["./types", "./node_modules/@types"],
     "moduleResolution": "node",
     "esModuleInterop": true,
     "declaration": true,
@@ -8,8 +7,8 @@
     "skipLibCheck": true,
     "downlevelIteration": true,
     "lib": ["es2019"],
-    "outDir": "dist"
+    "outDir": "dist",
+    "module": "CommonJS"
   },
-  "include": ["src", "types"],
-  "exclude": ["./**/*.spec.ts", "dist"]
+  "include": ["src"]
 }

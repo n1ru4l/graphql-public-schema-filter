@@ -27,7 +27,7 @@ yarn add -E @n1ru4l/graphql-public-schema-filter
 
 This library is designed to be inclusive for anyone within the GraphQL.js ecosystem. It supports both the SDL `makeExecutableSchema` and code-first via extension fields flow.
 
-There is now overhead happening when executing against the newly generated schema. It is highly recommended to built the public schema during server-startup and not on the fly during incoming requests.
+There is no delegation or validation overhead when executing against the newly generated schema. It is highly recommended to built the public schema during server-startup and not on the fly during incoming requests.
 
 ### Code-First
 
@@ -60,6 +60,8 @@ const privateSchema = new GraphQLSchema({
 const publicSchema = buildPublicSchema(privateSchema);
 // serve privateSchema or publicSchema based on the request :)
 ```
+
+You can also find this example within `examples/src/schema.ts`.
 
 ### SDL-First
 
