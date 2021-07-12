@@ -92,7 +92,7 @@ const publicSchema = buildPublicSchema(privateSchema);
 
 ## FAQ
 
-### Why `isPublic` and `@public` over `isPrivate` and `@private`
+### Why `isPublic` and `@public` over `isPrivate` and `@private`?
 
 Deny-listing is more prone to errors than allow-listing. By adding a directive/extension field we explicitly set something to public. The other way around it is easier to forgot to add a `@private`/ `isPrivate` annotation, which would automatically result in the new fields being public. Being verbose about what fields are public is the safest way.
 
