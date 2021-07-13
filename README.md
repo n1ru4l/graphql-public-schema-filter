@@ -13,7 +13,7 @@ If such a scenario is encountered the implementation will propagate and hide all
 
 As I have been building GraphQL APIs I often had the need to have both a private and public API.
 
-The private API is used for in-house products. Breaking changes can and will occur. It also includes mutations specific to in-house application built around the API. The public API, however, is used by individuals not part of our organization. We cannot simply roll out breaking changes to our GraphQL API for those. Furthermore, they should only have access to a subset of the whole GraphQL graph. By generating a subgraph out of the internal graph we can hide stuff, without having to maintain and build two GraphQL schema.
+The private API is used for in-house products. Breaking changes can and will occur. It also includes types and fields specific to in-house application built around the API. The public API, however, is used by individuals not part of our organization. We cannot simply roll out breaking changes on the GraphQL API for those. Furthermore, they should only have access to a subset of the whole GraphQL graph. By generating a subgraph out of the internal graph we can hide stuff, without having to maintain and build two GraphQL schema.
 
 ## Install instructions
 
