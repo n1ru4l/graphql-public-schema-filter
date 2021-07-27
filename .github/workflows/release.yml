@@ -28,7 +28,7 @@ jobs:
         id: changesets
         uses: changesets/action@master
         with:
-          publish: yarn release
+          publish: yarn ci:release
           commit: "chore(release): update monorepo packages versions"
           title: "Upcoming Release Changes"
         env:

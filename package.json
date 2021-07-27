@@ -56,7 +56,8 @@
   "scripts": {
     "test": "jest",
     "build": "tsc && bob build --single",
-    "ci:eslint": "eslint --ext .ts,.js,.tsx --ignore-path .gitignore ."
+    "ci:eslint": "eslint --ext .ts,.js,.tsx --ignore-path .gitignore .",
+    "ci:release": "changeset publish"
   },
   "husky": {
     "hooks": {
