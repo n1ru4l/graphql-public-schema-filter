@@ -1,25 +1,8 @@
-import {
-  GraphQLEnumType,
-  GraphQLInputObjectType,
-  GraphQLInterfaceType,
-  GraphQLList,
-  GraphQLNonNull,
-  GraphQLObjectType,
-  GraphQLScalarType,
-  GraphQLType,
-  GraphQLUnionType,
-} from "graphql";
+import { GraphQLList, GraphQLNonNull, GraphQLType } from "graphql";
 
 export const getWrappedType = (
   graphqlType: GraphQLType
-):
-  | GraphQLScalarType
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  | GraphQLObjectType<any, any>
-  | GraphQLInterfaceType
-  | GraphQLUnionType
-  | GraphQLEnumType
-  | GraphQLInputObjectType => {
+): Exclude<GraphQLType, GraphQLList<any> | GraphQLNonNull<any>> => {
   if (
     graphqlType instanceof GraphQLList ||
     graphqlType instanceof GraphQLNonNull
