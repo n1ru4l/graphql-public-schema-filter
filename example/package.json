@@ -2,8 +2,8 @@
   "name": "example",
   "private": true,
   "dependencies": {
-    "@graphql-ez/koa": "0.6.1",
-    "@graphql-ez/plugin-graphiql": "0.3.3",
+    "@graphql-ez/koa": "0.8.0",
+    "@graphql-ez/plugin-graphiql": "0.4.0",
     "@koa/router": "10.0.0",
     "graphql-ez": "0.9.0",
     "koa": "2.13.1"
