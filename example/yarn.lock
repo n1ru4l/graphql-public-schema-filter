@@ -33,20 +33,20 @@
   dependencies:
     tiny-lru "7.0.6"
 
-"@graphql-ez/koa@0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@graphql-ez/koa/-/koa-0.6.1.tgz#7254712d59acc6ee6110f348ad792745eae4e920"
-  integrity sha512-IUsI/jiwZnXXE53VPl3UKESZ4DoN9v6agqW+u3+OGjFD/Hilf2qBzxmeeD8u78Y2Wr/wIUy+QS3qof024M+SxQ==
+"@graphql-ez/koa@0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@graphql-ez/koa/-/koa-0.8.0.tgz#1e6ac893e4ffb8adae18d91bc6ce6edd0a46dd0b"
+  integrity sha512-Xhx57piyqGfnrt47QllfZKtKRcIg00kmSUwwyeAogJlVvL5HzwV1a1HdMNq7C3ynvpa/y7SdP2KjA/sQTZ5EuA==
   dependencies:
     "@koa/cors" "^3.1.0"
     "@types/koa-bodyparser" "^4.3.2"
     "@types/koa__cors" "^3.0.3"
     koa-bodyparser "^4.3.0"
 
-"@graphql-ez/plugin-graphiql@0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@graphql-ez/plugin-graphiql/-/plugin-graphiql-0.3.3.tgz#d6fa5bafc9a1737ca612e5c884ef881c1786ce99"
-  integrity sha512-pCUIwdcftvTI6me91Zc6uCSEHsxNX2qUeXjksIUmv9tCWkgeenIuqu7D0dJ3DWqsWwD0ZEVohBueCAplebVKfQ==
+"@graphql-ez/plugin-graphiql@0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@graphql-ez/plugin-graphiql/-/plugin-graphiql-0.4.0.tgz#dacf8e7357758e48351686d2aa993c1767c20f1b"
+  integrity sha512-nmCKGInhmZ50vf97U5t1Ryuh9RN2kqI/rUgDVfzaXC/Mx9dm1M6KpunLF89i0piWKDOJq6N2VXO26zhSfyZUHg==
   dependencies:
     graphql-helix "1.6.1"
 
