@@ -135,6 +135,40 @@ it("makes type public when its field is public", () => {
   );
 });
 
+it("makes type public when its extend field is public", () => {
+  const source = /* GraphQL */ `
+    type User {
+      id: ID! @public
+      login: String!
+    }
+
+    type Query {
+      hello2: String
+    }
+
+    extend type Query {
+      me: User @public
+    }
+  `;
+
+  const schema = buildSchema(source);
+
+  const filteredSchema = lib.buildPublicSchema(schema);
+
+  expectGraphQlSdlEqual(
+    filteredSchema,
+    /* GraphQL */ `
+      type User {
+        id: ID!
+      }
+
+      type Query {
+        me: User
+      }
+    `
+  );
+});
+
 it("makes fields public when type is public", () => {
   const source = /* GraphQL */ `
     type User @public {
