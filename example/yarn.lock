@@ -43,12 +43,12 @@
     "@types/koa__cors" "^3.0.3"
     koa-bodyparser "^4.3.0"
 
-"@graphql-ez/plugin-graphiql@0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@graphql-ez/plugin-graphiql/-/plugin-graphiql-0.4.0.tgz#dacf8e7357758e48351686d2aa993c1767c20f1b"
-  integrity sha512-nmCKGInhmZ50vf97U5t1Ryuh9RN2kqI/rUgDVfzaXC/Mx9dm1M6KpunLF89i0piWKDOJq6N2VXO26zhSfyZUHg==
+"@graphql-ez/plugin-graphiql@0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@graphql-ez/plugin-graphiql/-/plugin-graphiql-0.4.1.tgz#a1a763818b15b0ac8306d1ec8faf9b1e51adf2ad"
+  integrity sha512-Y6Mxw56umnoFi5K8l4edH9SiBbbCDvc9ZZ8/LSQpuxyvlng3mcULITWADua8k5P12ecrbh5e6UdvRvxjfDHaHg==
   dependencies:
-    graphql-helix "1.6.1"
+    graphql-helix "1.7.0"
 
 "@koa/cors@^3.1.0":
   version "3.1.0"
@@ -410,11 +410,6 @@ graphql-ez@0.9.1:
     "@envelop/types" "^1.0.1"
     "@envelop/validation-cache" "^1.0.0"
     graphql-helix "1.7.0"
-
-graphql-helix@1.6.1:
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/graphql-helix/-/graphql-helix-1.6.1.tgz#f504b8ceb8661c5884a6ae5edfcbd66891342710"
-  integrity sha512-fdh9+uHnH0hz4ooGJkfPBh02ieblnH9G0OkbYS4vMMTJnq0Ea4R/QsIwzb2vLMDQlKhODkMbKlc1uXwghnvJrw==
 
 graphql-helix@1.7.0:
   version "1.7.0"
