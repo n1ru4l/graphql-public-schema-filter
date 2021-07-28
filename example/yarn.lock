@@ -399,22 +399,27 @@ get-intrinsic@^1.0.2:
     has "^1.0.3"
     has-symbols "^1.0.1"
 
-graphql-ez@0.9.0:
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/graphql-ez/-/graphql-ez-0.9.0.tgz#d228d70b6ac0bc50370ac2ed1f10e7c672a1d008"
-  integrity sha512-+azPZuDc8459FvJoGfuyunyEfSYt5rLRJ9PVcav4zi56gnJQ1uy7uklgIKQU6Hzcf71lY/FXAwD6M03q6OeEWg==
+graphql-ez@0.9.1:
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/graphql-ez/-/graphql-ez-0.9.1.tgz#01038f245d042b0c0697b7ce4f16fc531fb7f011"
+  integrity sha512-YETeLlCoZ3R1heL8B1pJMPnOtSkg8ow1C9PSFhn7+c2xpqRNI1yDhE4KTKeWTdADkVBXEQjGFPQThCgsbS4n/g==
   dependencies:
     "@envelop/core" "^1.0.1"
     "@envelop/disable-introspection" "^1.0.0"
     "@envelop/parser-cache" "^1.0.0"
     "@envelop/types" "^1.0.1"
     "@envelop/validation-cache" "^1.0.0"
-    graphql-helix "1.6.1"
+    graphql-helix "1.7.0"
 
 graphql-helix@1.6.1:
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/graphql-helix/-/graphql-helix-1.6.1.tgz#f504b8ceb8661c5884a6ae5edfcbd66891342710"
   integrity sha512-fdh9+uHnH0hz4ooGJkfPBh02ieblnH9G0OkbYS4vMMTJnq0Ea4R/QsIwzb2vLMDQlKhODkMbKlc1uXwghnvJrw==
+
+graphql-helix@1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/graphql-helix/-/graphql-helix-1.7.0.tgz#452b2792447dddd259cdf4d6731da2171c8a7e49"
+  integrity sha512-CUqBZL0e/ivPnqFguzWCmMzPTjYXvak2465SsIiAYt0C2yZa4kjzQjB/JIF7YKHCsP8VrJwA29HXmYOJzPAe3g==
 
 has-symbols@^1.0.1:
   version "1.0.2"
