@@ -8,7 +8,9 @@
     "skipLibCheck": true,
     "downlevelIteration": true,
     "lib": ["es2019"],
-    "outDir": "dist"
+    "outDir": "dist",
+    "target": "es2019",
+    "module": "esnext"
   },
   "include": ["src", "types"],
   "exclude": ["./**/*.spec.ts", "dist"]
