@@ -4,19 +4,15 @@ import {
   GraphQLFieldConfigMap,
   GraphQLInputObjectType,
   GraphQLInterfaceType,
-  GraphQLNamedType,
   GraphQLUnionType,
   GraphQLScalarType,
   GraphQLEnumType,
-  GraphQLType,
-  GraphQLList,
-  GraphQLNonNull,
-  GraphQLInputType,
-  GraphQLOutputType,
   GraphQLInputFieldConfigMap,
+  DirectiveNode,
 } from "graphql";
 import { MapperKind, mapSchema } from "@graphql-tools/utils";
 import { getWrappedType } from "./get-wrapped-type";
+import { Maybe } from "graphql/jsutils/Maybe";
 
 const builtInTypes = new Set([
   "String",
@@ -35,17 +31,51 @@ const logWarning = (text: string) =>
   // eslint-disable-next-line no-console
   console.warn(`${colorYellow}${text}${colorReset}`);
 
+export type SharedExtensionAndDirectiveInformation = {
+  extensions?: Maybe<{
+    [attributeName: string]: any;
+  }>;
+  astNode?: Maybe<
+    Readonly<{
+      directives?: ReadonlyArray<DirectiveNode>;
+    }>
+  >;
+};
+
 /**
- * Maps the input schema to a public schema that only includes types/fields whose extensions.isPublic value is set to true.
+ * The default function used for determining whether a type or field should be public.
  */
-export const buildPublicSchema = (schema: GraphQLSchema) => {
+export const defaultIsPublic = (
+  input: SharedExtensionAndDirectiveInformation
+): boolean =>
+  input.extensions?.["isPublic"] === true ||
+  !!input.astNode?.directives?.find(
+    (directive) => directive.name.value === "public"
+  );
+
+export type BuildPublicSchemaParameter = {
+  /** The GraphQL schema that should be filtered. */
+  schema: GraphQLSchema;
+  /** Overwrite this function for customizing how fields are determined as public. Uses `defaultIsPublic` per default. */
+  isPublic?: typeof defaultIsPublic;
+};
+
+/**
+ * Maps the input schema to a public schema that only includes types and fields that are marked as public.
+ * Conflicts that would result in an invalid schema, will be printed to the console.
+ * The implementation tries to construct a valid schema by automatically hiding invalid constructs (such as empty ObjectTypes or fields whose return type is not public).
+ */
+export const buildPublicSchema = (
+  params: BuildPublicSchemaParameter
+): GraphQLSchema => {
+  const isPublic = params.isPublic ?? defaultIsPublic;
   const publicTypeNames: Set<string> = new Set(builtInTypes);
   const publicFieldReturnTypes: Map<string, string> = new Map();
   const publicFieldArgumentTypes: Map<string, string[]> = new Map();
   const unionTypes = new Set<GraphQLUnionType>();
   const interfaceTypes: Map<string, string[]> = new Map();
 
-  const types = schema.getTypeMap();
+  const types = params.schema.getTypeMap();
 
   for (const ttype of Object.values(types)) {
     // Skip internal types
@@ -57,11 +87,11 @@ export const buildPublicSchema = (schema: GraphQLSchema) => {
       ttype instanceof GraphQLScalarType ||
       ttype instanceof GraphQLEnumType
     ) {
-      if (ttype.extensions?.["isPublic"] === true) {
+      if (isPublic(ttype)) {
         publicTypeNames.add(ttype.name);
       }
     } else if (ttype instanceof GraphQLUnionType) {
-      if (ttype.extensions?.["isPublic"] === true) {
+      if (isPublic(ttype)) {
         publicTypeNames.add(ttype.name);
         unionTypes.add(ttype);
       }
@@ -69,10 +99,11 @@ export const buildPublicSchema = (schema: GraphQLSchema) => {
       ttype instanceof GraphQLInterfaceType ||
       ttype instanceof GraphQLObjectType
     ) {
-      const isTypePublic = ttype.extensions?.["isPublic"] === true;
+      const isTypePublic = isPublic(ttype);
+
       const fields = ttype.getFields();
       const isAnyFieldPublic = !!Array.from(Object.values(fields)).find(
-        (field) => !!field.extensions?.["isPublic"]
+        (field) => isPublic(field)
       );
       if (isTypePublic === true || isAnyFieldPublic === true) {
         publicTypeNames.add(ttype.name);
@@ -82,7 +113,7 @@ export const buildPublicSchema = (schema: GraphQLSchema) => {
         );
 
         for (const field of Object.values(fields)) {
-          const isFieldPublic = field.extensions?.["isPublic"] === true;
+          const isFieldPublic = isPublic(field);
           if (isFieldPublic === true || isTypePublic === true) {
             publicFieldReturnTypes.set(
               `${ttype.name}.${field.name}`,
@@ -99,16 +130,16 @@ export const buildPublicSchema = (schema: GraphQLSchema) => {
       }
     } else if (ttype instanceof GraphQLInputObjectType) {
       const fields = ttype.getFields();
-      const isTypePublic = ttype.extensions?.["isPublic"] === true;
+      const isTypePublic = isPublic(ttype);
       const isAnyFieldPublic = !!Array.from(Object.values(fields)).find(
-        (field) => field.extensions?.["isPublic"] === true
+        (field) => isPublic(field)
       );
 
       if (isTypePublic === true || isAnyFieldPublic === true) {
         publicTypeNames.add(ttype.name);
 
         for (const field of Object.values(fields)) {
-          const isFieldPublic = field.extensions?.["isPublic"] === true;
+          const isFieldPublic = isPublic(field);
           if (isTypePublic === true || isFieldPublic === true) {
             publicFieldReturnTypes.set(
               `${ttype.name}.${field.name}`,
@@ -179,7 +210,7 @@ export const buildPublicSchema = (schema: GraphQLSchema) => {
     // Required input arguments must always be public (or the Input Object type must be public.)
   }
 
-  return mapSchema(schema, {
+  return mapSchema(params.schema, {
     [MapperKind.OBJECT_TYPE]: (ttype) => {
       const config = ttype.toConfig();
       if (!publicTypeNames.has(config.name)) {
@@ -248,119 +279,5 @@ export const buildPublicSchema = (schema: GraphQLSchema) => {
       publicTypeNames.has(ttype.name) ? ttype : null,
     [MapperKind.ENUM_TYPE]: (ttype) =>
       publicTypeNames.has(ttype.name) ? ttype : null,
-  });
-};
-
-const hasTypePublicDirective = (ttype: GraphQLNamedType) =>
-  !!ttype.astNode?.directives?.find(
-    (directive) => directive.name.value === "public"
-  );
-
-/**
- * Maps input schema and translates @public usages to extensions.isPublic fields.
- */
-export const directiveToExtensionsTransform = (
-  schema: GraphQLSchema
-): GraphQLSchema => {
-  const typeMap = new Map<string, GraphQLNamedType>();
-  const getNewType = (ttype: GraphQLType): GraphQLType => {
-    if (ttype instanceof GraphQLList) {
-      return new GraphQLList(getNewType(ttype.ofType));
-    }
-    if (ttype instanceof GraphQLNonNull) {
-      return new GraphQLNonNull(getNewType(ttype.ofType));
-    }
-    const newType = typeMap.get(ttype.name);
-    if (!newType) {
-      throw new Error(`${ttype.name} counter-part does not exist :(`);
-    }
-    return newType;
-  };
-
-  return mapSchema(schema, {
-    [MapperKind.OBJECT_TYPE]: (ttype) => {
-      const isPublic = hasTypePublicDirective(ttype);
-      const config = ttype.toConfig();
-      config.extensions = { ...ttype.extensions, isPublic };
-      const newType = new GraphQLObjectType(config);
-      typeMap.set(newType.name, newType);
-      return newType;
-    },
-    [MapperKind.INPUT_OBJECT_TYPE]: (ttype) => {
-      const isPublic = hasTypePublicDirective(ttype);
-      const config = ttype.toConfig();
-      config.extensions = { ...ttype.extensions, isPublic };
-      const newType = new GraphQLInputObjectType(config);
-      typeMap.set(newType.name, newType);
-      return newType;
-    },
-    [MapperKind.UNION_TYPE]: (ttype) => {
-      const isPublic = hasTypePublicDirective(ttype);
-      const config = ttype.toConfig();
-      config.extensions = { ...ttype.extensions, isPublic };
-      const newType = new GraphQLUnionType(config);
-      typeMap.set(newType.name, newType);
-      return newType;
-    },
-    [MapperKind.INTERFACE_TYPE]: (ttype) => {
-      const isPublic = hasTypePublicDirective(ttype);
-      const config = ttype.toConfig();
-      config.extensions = { ...ttype.extensions, isPublic };
-      const newType = new GraphQLInterfaceType(config);
-      typeMap.set(newType.name, newType);
-      return newType;
-    },
-    [MapperKind.SCALAR_TYPE]: (ttype) => {
-      if (builtInTypes.has(ttype.name)) {
-        typeMap.set(ttype.name, ttype);
-        return ttype;
-      }
-      const isPublic = hasTypePublicDirective(ttype);
-      const config = ttype.toConfig();
-      config.extensions = { ...ttype.extensions, isPublic };
-      const newType = new GraphQLScalarType(config);
-      typeMap.set(newType.name, newType);
-      return newType;
-    },
-    [MapperKind.ENUM_TYPE]: (ttype) => {
-      const isPublic = hasTypePublicDirective(ttype);
-      const config = ttype.toConfig();
-      config.extensions = { ...ttype.extensions, isPublic };
-      const newType = new GraphQLEnumType(config);
-      typeMap.set(newType.name, newType);
-      return newType;
-    },
-    [MapperKind.INPUT_OBJECT_FIELD]: (field) => {
-      const isPublic = !!field.astNode?.directives?.find(
-        (directive) => directive.name.value === "public"
-      );
-
-      return {
-        ...field,
-        extensions: { ...field.extensions, isPublic },
-        type: getNewType(field.type) as GraphQLInputType,
-      };
-    },
-    [MapperKind.OBJECT_FIELD]: (field) => {
-      const isPublic = !!field.astNode?.directives?.find(
-        (directive) => directive.name.value === "public"
-      );
-      return {
-        ...field,
-        extensions: { ...field.extensions, isPublic },
-        type: getNewType(field.type) as GraphQLOutputType,
-      };
-    },
-    [MapperKind.ARGUMENT]: (arg) => {
-      const isPublic = !!arg.astNode?.directives?.find(
-        (directive) => directive.name.value === "public"
-      );
-
-      return {
-        ...arg,
-        extensions: { ...arg.extensions, isPublic },
-        type: getNewType(arg.type) as GraphQLInputType,
-      };
-    },
   });
 };

@@ -18,7 +18,6 @@ import {
 const buildSchema = (source: string) =>
   makeExecutableSchema({
     typeDefs: [publicDirectiveSDL, source],
-    schemaTransforms: [lib.directiveToExtensionsTransform],
   });
 
 const printIntrospectionSdl = (filteredSchema: GraphQLSchema) => {
@@ -71,7 +70,7 @@ it("can be called", () => {
 
   const schema = buildSchema(source);
 
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
 
   expectGraphQlSdlEqual(
     filteredSchema,
@@ -98,7 +97,7 @@ it("does not expose the public directive", () => {
 
   const schema = buildSchema(source);
 
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
   const sdl = printIntrospectionSdl(filteredSchema);
 
   expect(sdl.includes("public")).toEqual(false);
@@ -119,7 +118,7 @@ it("makes type public when its field is public", () => {
 
   const schema = buildSchema(source);
 
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
 
   expectGraphQlSdlEqual(
     filteredSchema,
@@ -153,7 +152,7 @@ it("makes type public when its extend field is public", () => {
 
   const schema = buildSchema(source);
 
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
 
   expectGraphQlSdlEqual(
     filteredSchema,
@@ -184,7 +183,7 @@ it("makes fields public when type is public", () => {
 
   const schema = buildSchema(source);
 
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
 
   expectGraphQlSdlEqual(
     filteredSchema,
@@ -216,7 +215,7 @@ it("what if type is not public", () => {
 
   const schema = buildSchema(source);
 
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
 
   expectGraphQlSdlEqual(
     filteredSchema,
@@ -249,7 +248,7 @@ it("does not make unions public when type is not public", () => {
 
   const schema = buildSchema(source);
 
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
 
   expectGraphQlSdlEqual(
     filteredSchema,
@@ -282,7 +281,7 @@ it("makes unions public when type is public", () => {
 
   const schema = buildSchema(source);
 
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
 
   expectGraphQlSdlEqual(
     filteredSchema,
@@ -306,7 +305,7 @@ it("makes unions public when type is public", () => {
   );
 });
 
-it("hides field/type if its interface is public", () => {
+it("hides field/type if its interface is not public", () => {
   const source = /* GraphQL */ `
     interface Node {
       id: ID!
@@ -331,7 +330,7 @@ it("hides field/type if its interface is public", () => {
 
   const schema = buildSchema(source);
 
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
 
   expectGraphQlSdlEqual(
     filteredSchema,
@@ -368,7 +367,52 @@ it("exposes field/type if its interface is public", () => {
 
   const schema = buildSchema(source);
 
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
+
+  expectGraphQlSdlEqual(
+    filteredSchema,
+    /* GraphQL */ `
+      interface Node {
+        id: ID!
+      }
+      type Person implements Node {
+        id: ID!
+        name: String!
+      }
+      type Query {
+        person: Person
+        hello2: String
+      }
+    `
+  );
+});
+
+it("exposes interface if interface field is public", () => {
+  const source = /* GraphQL */ `
+    interface Node {
+      id: ID! @public
+    }
+
+    type Book implements Node {
+      id: ID!
+      title: String!
+    }
+
+    type Person implements Node @public {
+      id: ID!
+      name: String!
+    }
+
+    type Query {
+      node: Node
+      person: Person @public
+      hello2: String @public
+    }
+  `;
+
+  const schema = buildSchema(source);
+
+  const filteredSchema = lib.buildPublicSchema({ schema });
 
   expectGraphQlSdlEqual(
     filteredSchema,
@@ -406,7 +450,7 @@ it("hides mutation with input types that are not marked as public", () => {
 
   const schema = buildSchema(source);
 
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
 
   expectGraphQlSdlEqual(
     filteredSchema,
@@ -440,7 +484,7 @@ it("shows mutation with input types that are marked as public", () => {
 
   const schema = buildSchema(source);
 
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
 
   expectGraphQlSdlEqual(
     filteredSchema,
@@ -477,7 +521,7 @@ it("exposes Scalars correctly", () => {
 
   const schema = buildSchema(source);
 
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
 
   expectGraphQlSdlEqual(
     filteredSchema,
@@ -509,7 +553,7 @@ it("exposes Input fields correctly", () => {
   `;
 
   const schema = buildSchema(source);
-  const filteredSchema = lib.buildPublicSchema(schema);
+  const filteredSchema = lib.buildPublicSchema({ schema });
 
   expectGraphQlSdlEqual(
     filteredSchema,

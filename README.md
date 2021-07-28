@@ -57,7 +57,7 @@ const GraphQLQueryType = new GraphQLObjectType({
 const privateSchema = new GraphQLSchema({
   query: GraphQLQueryType,
 });
-const publicSchema = buildPublicSchema(privateSchema);
+const publicSchema = buildPublicSchema({ schema: privateSchema });
 // serve privateSchema or publicSchema based on the request :)
 ```
 
@@ -65,13 +65,12 @@ You can also find this example within `examples/src/schema.ts`.
 
 ### SDL-First
 
-This package exposes a `directiveToExtensionsTransform` function that can be passed to the `makeExecutableSchema` `schemaTransforms` options. It will map schema fragment usages to the `isPublic` extension fields.
+Instead of using the extension fields, we use the `@public` directive.
 
 ```tsx
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import {
   publicDirectiveSDL,
-  directiveToExtensionsTransform,
   buildPublicSchema,
 } from "@n1ru4l/graphql-public-schema-filter";
 
@@ -84,9 +83,8 @@ const source = /* GraphQL */ `
 
 const privateSchema = makeExecutableSchema({
   typeDefs: [publicDirectiveSDL, source],
-  schemaTransforms: [directiveToExtensionsTransform],
 });
-const publicSchema = buildPublicSchema(privateSchema);
+const publicSchema = buildPublicSchema({ schema: privateSchema });
 // serve privateSchema or publicSchema based on the request :)
 ```
 
@@ -100,7 +98,28 @@ Deny-listing is more prone to errors than allow-listing. By adding a directive/e
 
 I considered this at the beginning, but in practice we never had a use for this. Having multiple public schemas requires maintaining a lot of documentation. In our use-case we only have a public and a private schema. There is still role based access for the public schema. certain users are not allowed to select specific fields. Instead of hiding those fields for those users we instead deny operations that select fields the users are not allowed to select before even executing it with the [envelop `useOperationFieldPermissions` plugin](https://www.envelop.dev/plugins/use-operation-field-permissions).
 
-If you need to build many unique schemas based on different parameters and think it is a good idea please open a issue or a pull request so we can discuss a implementation.
+You can overwrite the `isPublic` function which is used to determine whether a field or type is public based on directives and extensions. This allows to fully customize the behavior based on your needs.
+
+```ts
+type SharedExtensionAndDirectiveInformation = {
+  extensions?: Maybe<{
+    [attributeName: string]: any;
+  }>;
+  astNode?: Maybe<
+    Readonly<{
+      directives?: ReadonlyArray<DirectiveNode>;
+    }>
+  >;
+};
+
+export const defaultIsPublic = (
+  input: SharedExtensionAndDirectiveInformation
+): boolean =>
+  input.extensions?.["isPublic"] === true ||
+  !!input.astNode?.directives?.find(
+    (directive) => directive.name.value === "public"
+  );
+```
 
 ## License
 
