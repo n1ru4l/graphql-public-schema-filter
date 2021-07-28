@@ -23,6 +23,6 @@
   },
   "resolutions": {
     "@envelop/core": "1.0.1",
-    "@envelop/types": "1.0.1"
+    "@envelop/types": "1.0.2"
   }
 }
