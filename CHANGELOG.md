@@ -1,5 +1,11 @@
 # @n1ru4l/graphql-public-schema-filter
 
+## 0.3.1
+
+### Patch Changes
+
+- a07141a: update to latest graphql-tools version
+
 ## 0.3.0
 
 ### Minor Changes
