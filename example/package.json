@@ -22,7 +22,7 @@
     "start": "node --experimental-specifier-resolution=node --loader ts-node/esm ./src/server.ts"
   },
   "resolutions": {
-    "@envelop/core": "1.0.1",
-    "@envelop/types": "1.0.1"
+    "@envelop/core": "1.0.2",
+    "@envelop/types": "1.0.2"
   }
 }
