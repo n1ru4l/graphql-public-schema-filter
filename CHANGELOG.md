@@ -1,5 +1,11 @@
 # @n1ru4l/graphql-public-schema-filter
 
+## 0.4.0
+
+### Minor Changes
+
+- 04a3f8f: support hiding non null arguments
+
 ## 0.3.1
 
 ### Patch Changes
