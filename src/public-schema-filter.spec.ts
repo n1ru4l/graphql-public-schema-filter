@@ -444,7 +444,7 @@ it("hides mutation with input types that are not marked as public", () => {
 
     type Mutation {
       foo: String @public
-      person(foo: Foo): String @public
+      person(foo: Foo!): String @public
     }
   `;
 
@@ -478,7 +478,7 @@ it("shows mutation with input types that are marked as public", () => {
 
     type Mutation {
       foo: String @public
-      person(foo: Foo): String @public
+      person(foo: Foo!): String @public
     }
   `;
 
@@ -499,7 +499,7 @@ it("shows mutation with input types that are marked as public", () => {
 
       type Mutation {
         foo: String
-        person(foo: Foo): String
+        person(foo: Foo!): String
       }
     `
   );
@@ -564,6 +564,90 @@ it("exposes Input fields correctly", () => {
 
       type Query {
         foo(input: Foo!): Boolean
+      }
+    `
+  );
+});
+
+it("hides argument fields correctly", () => {
+  const source = /* GraphQL */ `
+    type Query {
+      foo(input: Boolean): Boolean @public
+    }
+  `;
+
+  const schema = buildSchema(source);
+  const filteredSchema = lib.buildPublicSchema({ schema });
+
+  expectGraphQlSdlEqual(
+    filteredSchema,
+    /* GraphQL */ `
+      type Query {
+        foo: Boolean
+      }
+    `
+  );
+});
+
+it("does not hide argument fields that are marked as public", () => {
+  const source = /* GraphQL */ `
+    type Query {
+      foo(input: Boolean @public): Boolean @public
+    }
+  `;
+
+  const schema = buildSchema(source);
+  const filteredSchema = lib.buildPublicSchema({ schema });
+
+  expectGraphQlSdlEqual(
+    filteredSchema,
+    /* GraphQL */ `
+      type Query {
+        foo(input: Boolean): Boolean
+      }
+    `
+  );
+});
+
+it("keeps non null argument fields by default", () => {
+  const source = /* GraphQL */ `
+    type Query {
+      foo(input: Boolean!): Boolean @public
+    }
+  `;
+
+  const schema = buildSchema(source);
+  const filteredSchema = lib.buildPublicSchema({ schema });
+
+  expectGraphQlSdlEqual(
+    filteredSchema,
+    /* GraphQL */ `
+      type Query {
+        foo(input: Boolean!): Boolean
+      }
+    `
+  );
+});
+
+it("advanced argument handling", () => {
+  const source = /* GraphQL */ `
+    input Foo {
+      foo: String
+    }
+    type Query {
+      yee: String @public
+      foo(input: Foo @public): Boolean @public
+    }
+  `;
+
+  const schema = buildSchema(source);
+  const filteredSchema = lib.buildPublicSchema({ schema });
+
+  expectGraphQlSdlEqual(
+    filteredSchema,
+    /* GraphQL */ `
+      type Query {
+        yee: String
       }
     `
   );

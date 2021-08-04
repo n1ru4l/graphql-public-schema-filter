@@ -12,6 +12,7 @@ export const GraphQLPublicDirective = new GraphQLDirective({
     DirectiveLocation.INPUT_OBJECT,
     DirectiveLocation.SCALAR,
     DirectiveLocation.INPUT_FIELD_DEFINITION,
+    DirectiveLocation.ARGUMENT_DEFINITION,
   ],
 });
 
