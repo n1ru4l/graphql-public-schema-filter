@@ -9,6 +9,8 @@ import {
   GraphQLEnumType,
   GraphQLInputFieldConfigMap,
   DirectiveNode,
+  GraphQLFieldConfigArgumentMap,
+  isNonNullType,
 } from "graphql";
 import { MapperKind, mapSchema } from "@graphql-tools/utils";
 import { getWrappedType } from "./get-wrapped-type";
@@ -71,6 +73,7 @@ export const buildPublicSchema = (
   const isPublic = params.isPublic ?? defaultIsPublic;
   const publicTypeNames: Set<string> = new Set(builtInTypes);
   const publicFieldReturnTypes: Map<string, string> = new Map();
+  const publicFieldArguments: Map<string, Set<string>> = new Map();
   const publicFieldArgumentTypes: Map<string, string[]> = new Map();
   const unionTypes = new Set<GraphQLUnionType>();
   const interfaceTypes: Map<string, string[]> = new Map();
@@ -119,10 +122,23 @@ export const buildPublicSchema = (
               `${ttype.name}.${field.name}`,
               getWrappedType(field.type).name
             );
-            if (field.args.length > 0) {
+            const fieldArgumentTypes: Array<string> = [];
+            const fieldArguments = new Set<string>();
+            for (const arg of field.args) {
+              if (isNonNullType(arg.type) || isPublic(arg)) {
+                fieldArguments.add(arg.name);
+                fieldArgumentTypes.push(getWrappedType(arg.type).name);
+              }
+            }
+
+            if (fieldArgumentTypes.length) {
               publicFieldArgumentTypes.set(
                 `${ttype.name}.${field.name}`,
-                field.args.map((arg) => getWrappedType(arg.type).name)
+                fieldArgumentTypes
+              );
+              publicFieldArguments.set(
+                `${ttype.name}.${field.name}`,
+                fieldArguments
               );
             }
           }
@@ -223,7 +239,25 @@ export const buildPublicSchema = (
           allAvailableFields.has(`${config.name}.${name}`) &&
           publicTypeNames.has(getWrappedType(fieldConfig.type).name)
         ) {
-          newFields[name] = fieldConfig;
+          const args: GraphQLFieldConfigArgumentMap = {};
+
+          if (fieldConfig.args != null) {
+            const publicArguments = publicFieldArguments.get(
+              `${ttype.name}.${name}`
+            );
+            if (publicArguments != null) {
+              for (const [argName, arg] of Object.entries(fieldConfig.args)) {
+                if (publicArguments.has(argName)) {
+                  args[argName] = arg;
+                }
+              }
+            }
+          }
+
+          newFields[name] = {
+            ...fieldConfig,
+            args,
+          };
         }
       }
       config.fields = newFields;
