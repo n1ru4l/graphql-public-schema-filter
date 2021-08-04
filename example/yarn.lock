@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@envelop/core@1.0.2", "@envelop/core@^1.0.2":
+"@envelop/core@1.0.2", "@envelop/core@^1.0.3":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@envelop/core/-/core-1.0.2.tgz#ceb161078df1be33a6c911602f6b16d3dd0acc8f"
   integrity sha512-gIYListx8T9hO7cbaGVmRElB6pz+w3j+oTt6EFlmoZA8n0hqzOas2xFup36V31ixBrnWSJ21ACt1R3EfGz8BbA==
@@ -399,12 +399,12 @@ get-intrinsic@^1.0.2:
     has "^1.0.3"
     has-symbols "^1.0.1"
 
-graphql-ez@0.9.2:
-  version "0.9.2"
-  resolved "https://registry.yarnpkg.com/graphql-ez/-/graphql-ez-0.9.2.tgz#50ce99ec93883b49d293b08942b780bf16cadbc4"
-  integrity sha512-263LcNPJlEKsSCsQRYEYrb1v++hZkXL+CJofr7J0eD9gboi7rMkY7wc5fsKkzKNK/F3Zoui4x6dSQAZO3vzKXg==
+graphql-ez@0.10.0:
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/graphql-ez/-/graphql-ez-0.10.0.tgz#d2d106809494a5335b2075799f84ae97b99b237a"
+  integrity sha512-SDak1q5E2T7QAHCG0pLKFOqd15ZiagUDhFcLGBj/udCHRSiJ+GSFVt/RwjfDOTgoRujbc5HKkzMuuVB024Qqug==
   dependencies:
-    "@envelop/core" "^1.0.2"
+    "@envelop/core" "^1.0.3"
     "@envelop/disable-introspection" "^1.0.0"
     "@envelop/parser-cache" "^1.0.0"
     "@envelop/types" "^1.0.2"
