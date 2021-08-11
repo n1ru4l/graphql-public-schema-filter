@@ -71,6 +71,11 @@
 "@n1ru4l/graphql-public-schema-filter@link:../dist":
   version "0.0.0"
 
+"@pablosz/graphql-helix@^1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@pablosz/graphql-helix/-/graphql-helix-1.7.1.tgz#cf617f64ed5dd58c071ecb605b9de193b1c27ec1"
+  integrity sha512-faSocO6Qu0wZ0MDF7S6ZDN+YQT5sn3XXaU6hpUbw4FYETZ1t7b8RunuxxcVPv6v5ci5FMksdk0XvVeJGHqV0og==
+
 "@tsconfig/node10@^1.0.7":
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/@tsconfig/node10/-/node10-1.0.8.tgz#c1e4e80d6f964fbecb3359c43bd48b40f7cadad9"
@@ -399,17 +404,17 @@ get-intrinsic@^1.0.2:
     has "^1.0.3"
     has-symbols "^1.0.1"
 
-graphql-ez@0.10.0:
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/graphql-ez/-/graphql-ez-0.10.0.tgz#d2d106809494a5335b2075799f84ae97b99b237a"
-  integrity sha512-SDak1q5E2T7QAHCG0pLKFOqd15ZiagUDhFcLGBj/udCHRSiJ+GSFVt/RwjfDOTgoRujbc5HKkzMuuVB024Qqug==
+graphql-ez@0.11.0:
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/graphql-ez/-/graphql-ez-0.11.0.tgz#a71e6d4c86f70e7b508bcfa9afb32b86905fc115"
+  integrity sha512-WX46fUIzvjjZikBYWxM2xwbk+o4yFpJuMXV07mB1Uau+d4koRlDqwMMgxUIhSrSr3HfWLxn7mgxFtwB6yFParw==
   dependencies:
     "@envelop/core" "^1.0.3"
     "@envelop/disable-introspection" "^1.0.0"
     "@envelop/parser-cache" "^1.0.0"
     "@envelop/types" "^1.0.2"
     "@envelop/validation-cache" "^1.0.0"
-    graphql-helix "1.7.0"
+    "@pablosz/graphql-helix" "^1.7.1"
 
 graphql-helix@1.7.0:
   version "1.7.0"

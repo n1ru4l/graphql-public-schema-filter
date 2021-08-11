@@ -5,7 +5,7 @@
     "@graphql-ez/koa": "0.8.1",
     "@graphql-ez/plugin-graphiql": "0.4.2",
     "@koa/router": "10.1.0",
-    "graphql-ez": "0.10.0",
+    "graphql-ez": "0.11.0",
     "koa": "2.13.1"
   },
   "devDependencies": {
