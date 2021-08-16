@@ -38,7 +38,7 @@
     "@changesets/cli": "2.16.0",
     "@graphql-codegen/testing": "1.17.7",
     "@graphql-tools/schema": "8.1.1",
-    "@types/jest": "26.0.24",
+    "@types/jest": "27.0.1",
     "@typescript-eslint/eslint-plugin": "4.29.2",
     "@typescript-eslint/parser": "4.29.2",
     "bob-the-bundler": "1.5.1",
