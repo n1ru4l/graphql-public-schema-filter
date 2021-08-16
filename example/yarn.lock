@@ -45,22 +45,22 @@
   dependencies:
     tiny-lru "7.0.6"
 
-"@graphql-ez/koa@0.8.1":
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/@graphql-ez/koa/-/koa-0.8.1.tgz#28a86dce4a028ee56c64656f702eb94a46128fcb"
-  integrity sha512-KFavG5wAwAzW/EvEXo5Xq6DuEMCpsQZiEB/jqypREseAZGzYp7EmjsJq9xhzzVlRncT1uD/L4kQPGk/Is/ENpA==
+"@graphql-ez/koa@0.8.2":
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/@graphql-ez/koa/-/koa-0.8.2.tgz#c84132a174e299f7690a4c208d7842d3e4554412"
+  integrity sha512-vKKmjEP4fi4/qiRrj538UqnvxVJwkYJOjEIzVzzlsnu0VCSoCIwOfel86D4pUQ2fn+FH+4lPMcv9FGCU1Mz1hA==
   dependencies:
     "@koa/cors" "^3.1.0"
-    "@types/koa-bodyparser" "^4.3.2"
+    "@types/koa-bodyparser" "^4.3.3"
     "@types/koa__cors" "^3.0.3"
     koa-bodyparser "^4.3.0"
 
-"@graphql-ez/plugin-graphiql@0.4.2":
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/@graphql-ez/plugin-graphiql/-/plugin-graphiql-0.4.2.tgz#a0ce3eca14de54859740e23cd7a47337db3619ef"
-  integrity sha512-+VmpZkYb98VdF3Sue0bZSnKhEI2j5VzBHz7SbONKeGe6UnC6biF+qhJOTk15atjgTGMRIBFerjdGbUemK2tAjg==
+"@graphql-ez/plugin-graphiql@0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@graphql-ez/plugin-graphiql/-/plugin-graphiql-0.5.0.tgz#23d8909aba471dcdbb2c28a52e4f99a7f4145180"
+  integrity sha512-04qxchagc1i2DR03q/uRMNBtftz+0jZaN9rfpPxdkhdAt8vmtoCYuYGSH4TWSZ1qv2UZf0gg6twE2krCcby34A==
   dependencies:
-    graphql-helix "1.7.0"
+    "@pablosz/graphql-helix-graphiql" "^2.0.0"
 
 "@koa/cors@^3.1.0":
   version "3.1.0"
@@ -82,6 +82,11 @@
 
 "@n1ru4l/graphql-public-schema-filter@link:../dist":
   version "0.0.0"
+
+"@pablosz/graphql-helix-graphiql@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@pablosz/graphql-helix-graphiql/-/graphql-helix-graphiql-2.0.0.tgz#07ae406266d388f6d05d8ca6f850418e3e620c3a"
+  integrity sha512-7dj4oBKcXcTaVTtJWWDm0E2l8IQdm//tCZdDMmqePu1+8q8Xc/KJXmVTKgeNqxjZOr4k+uI1zmQrpU/Jy6MmwQ==
 
 "@pablosz/graphql-helix@^1.7.1":
   version "1.7.1"
@@ -179,10 +184,10 @@
   resolved "https://registry.yarnpkg.com/@types/keygrip/-/keygrip-1.0.2.tgz#513abfd256d7ad0bf1ee1873606317b33b1b2a72"
   integrity sha512-GJhpTepz2udxGexqos8wgaBx4I/zWIDPh/KOGEwAqtuGDkOUJu5eFvwmdBX4AmB8Odsr+9pHCQqiAqDL/yKMKw==
 
-"@types/koa-bodyparser@^4.3.2":
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/@types/koa-bodyparser/-/koa-bodyparser-4.3.2.tgz#ccedc381adeb81e05cbdffb5d2df2bd99a7e7de9"
-  integrity sha512-fjNPSs3qNs/sKVT6O6VdF+RTBd5HLlFtFmAZxWGiOPwCm7+/jhia462Ni30XmCM2ziUbfx2pa79NkHDBI0TgAQ==
+"@types/koa-bodyparser@^4.3.3":
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/@types/koa-bodyparser/-/koa-bodyparser-4.3.3.tgz#9c7d4295576bc863d550002f732f1c57dd88cc58"
+  integrity sha512-/ileIpXsy1fFEzgZhZ07eZH8rAVL7jwuk/kaoVEfauO6s80g2LIDIJKEyDbuAL9S/BWflKzEC0PHD6aXkmaSbw==
   dependencies:
     "@types/koa" "*"
 
@@ -432,11 +437,6 @@ graphql-ez@0.11.0:
     "@envelop/types" "^1.0.2"
     "@envelop/validation-cache" "^1.0.0"
     "@pablosz/graphql-helix" "^1.7.1"
-
-graphql-helix@1.7.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/graphql-helix/-/graphql-helix-1.7.0.tgz#452b2792447dddd259cdf4d6731da2171c8a7e49"
-  integrity sha512-CUqBZL0e/ivPnqFguzWCmMzPTjYXvak2465SsIiAYt0C2yZa4kjzQjB/JIF7YKHCsP8VrJwA29HXmYOJzPAe3g==
 
 has-symbols@^1.0.1:
   version "1.0.2"
