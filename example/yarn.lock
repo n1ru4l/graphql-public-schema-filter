@@ -45,22 +45,28 @@
   dependencies:
     tiny-lru "7.0.6"
 
-"@graphql-ez/koa@0.8.2":
-  version "0.8.2"
-  resolved "https://registry.yarnpkg.com/@graphql-ez/koa/-/koa-0.8.2.tgz#c84132a174e299f7690a4c208d7842d3e4554412"
-  integrity sha512-vKKmjEP4fi4/qiRrj538UqnvxVJwkYJOjEIzVzzlsnu0VCSoCIwOfel86D4pUQ2fn+FH+4lPMcv9FGCU1Mz1hA==
+"@graphql-ez/koa@0.8.3":
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/@graphql-ez/koa/-/koa-0.8.3.tgz#add19d48ee3e635ad999dbfd63293d3cf1156399"
+  integrity sha512-eKtdpCyY5U6CKrXlX7pgEUeE8dB9p4bZD4jIP9zq7Ch9DPfkY7OeaRNgxl7BladS56Yg8eo9x82cWF62DyqCJw==
   dependencies:
     "@koa/cors" "^3.1.0"
     "@types/koa-bodyparser" "^4.3.3"
     "@types/koa__cors" "^3.0.3"
     koa-bodyparser "^4.3.0"
 
-"@graphql-ez/plugin-graphiql@0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@graphql-ez/plugin-graphiql/-/plugin-graphiql-0.5.0.tgz#23d8909aba471dcdbb2c28a52e4f99a7f4145180"
-  integrity sha512-04qxchagc1i2DR03q/uRMNBtftz+0jZaN9rfpPxdkhdAt8vmtoCYuYGSH4TWSZ1qv2UZf0gg6twE2krCcby34A==
+"@graphql-ez/plugin-graphiql@0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@graphql-ez/plugin-graphiql/-/plugin-graphiql-0.6.0.tgz#6a4f7e7f315171e7146d31ff69b75817bf20eced"
+  integrity sha512-s4mmIRXbHNFi8ax+NQxmIsgAXWwZ2mGTUYEBGIIej4IS3eyuAVtVuEfPKXryehPRvH6fobn6z43bhfFPTKcRwg==
   dependencies:
+    "@graphql-ez/utils" "^0.1.0"
     "@pablosz/graphql-helix-graphiql" "^2.0.0"
+
+"@graphql-ez/utils@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@graphql-ez/utils/-/utils-0.1.0.tgz#7acf5c7b8304eff5ee6812afb4f9896092b423a9"
+  integrity sha512-Wxf1rAlSDycQVgb4IJvFNa0ciy6k+9Ohu+s6R4VR4+Vyb9aU4se1l1FQpcEjczfz4/SMm8hs2r257mlyC7e0+g==
 
 "@koa/cors@^3.1.0":
   version "3.1.0"
@@ -426,16 +432,17 @@ get-intrinsic@^1.0.2:
     has "^1.0.3"
     has-symbols "^1.0.1"
 
-graphql-ez@0.11.0:
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/graphql-ez/-/graphql-ez-0.11.0.tgz#a71e6d4c86f70e7b508bcfa9afb32b86905fc115"
-  integrity sha512-WX46fUIzvjjZikBYWxM2xwbk+o4yFpJuMXV07mB1Uau+d4koRlDqwMMgxUIhSrSr3HfWLxn7mgxFtwB6yFParw==
+graphql-ez@0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/graphql-ez/-/graphql-ez-0.12.0.tgz#01fc1225b22eae75c91d13fa70348b9c5d55b5de"
+  integrity sha512-XmkFfOo+9Ar2t6X1Mygpk/F2Bw0Wh6WTksBFda3tveAmw2kLOIpA7szNBOsuIiSfjJyjCxCAvv7CEmG9rz2zFg==
   dependencies:
     "@envelop/core" "^1.0.3"
     "@envelop/disable-introspection" "^1.0.0"
     "@envelop/parser-cache" "^1.0.0"
     "@envelop/types" "^1.0.2"
     "@envelop/validation-cache" "^1.0.0"
+    "@graphql-ez/utils" "^0.1.0"
     "@pablosz/graphql-helix" "^1.7.1"
 
 has-symbols@^1.0.1:
