@@ -5,7 +5,7 @@
   "packageRules": [
     {
       "groupName": "graphql-ez",
-      "matchPackagePrefixes": "@graphql-ez"
+      "matchPackagePrefixes": ["@graphql-ez", "graphql-ez"]
     },
     {
       "groupName": "typescript-eslint",
