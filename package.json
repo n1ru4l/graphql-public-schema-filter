@@ -43,7 +43,7 @@
     "@typescript-eslint/parser": "4.29.2",
     "bob-the-bundler": "1.5.1",
     "graphql": "15.5.1",
-    "husky": "7.0.1",
+    "husky": "7.0.2",
     "jest": "27.0.6",
     "lint-staged": "11.1.2",
     "patch-package": "6.4.7",
