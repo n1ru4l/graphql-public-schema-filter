@@ -14,14 +14,14 @@
   dependencies:
     "@cspotcode/source-map-consumer" "0.8.0"
 
-"@envelop/core@1.6.0", "@envelop/core@^1.1.0":
+"@envelop/core@1.6.0", "@envelop/core@^1.6.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@envelop/core/-/core-1.6.0.tgz#65518d328c1cf7d731f046c40eca2844f36e09d3"
   integrity sha512-Whnrp/Rswwva5IWTW7fqfr+ALuqZhSp67kgXKggF4l8I3rjkZQBerG+YIlPyrg+PHhalFbX0tqvaeqsL5QVjcQ==
   dependencies:
     "@envelop/types" "1.5.0"
 
-"@envelop/types@1.5.0", "@envelop/types@^1.1.0":
+"@envelop/types@1.5.0", "@envelop/types@^1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@envelop/types/-/types-1.5.0.tgz#3572ae19754942e5a08d9c2fae8991e86406e2c5"
   integrity sha512-NSSHhL7n30IEgYXC2qRt9PqFnNb1ITGAhljJKYJufAZ8xz+DeBP2RHBt0MYvETWz84yc1525piCt1H9Vx4Q44Q==
@@ -36,13 +36,13 @@
     "@types/koa__cors" "^3.0.3"
     koa-bodyparser "^4.3.0"
 
-"@graphql-ez/plugin-graphiql@0.10.1":
-  version "0.10.1"
-  resolved "https://registry.yarnpkg.com/@graphql-ez/plugin-graphiql/-/plugin-graphiql-0.10.1.tgz#982853878b3a36e22c0a00852281fe17177d9f92"
-  integrity sha512-mUDcod+pNPS60+oPomxOnydj9DDmXatrpe+GcfGbvYla5hiIcfN5avs5pvbtEwAj5b8VmdbikoP8aXzJoZGBjg==
+"@graphql-ez/plugin-graphiql@0.10.4":
+  version "0.10.4"
+  resolved "https://registry.yarnpkg.com/@graphql-ez/plugin-graphiql/-/plugin-graphiql-0.10.4.tgz#5c56123e0bceaae8b235b22091e5846e0674fd92"
+  integrity sha512-vuWS8EegF+ZLNWdLoeJDJ+kdL3IMbnCMpGVWJQnZwolM7fC9aKK+1lawVCYFMCkX/PPpKEhzBiiKNk4ubc7yVQ==
   dependencies:
     "@graphql-ez/utils" "^0.1.2"
-    "@pablosz/graphql-helix-graphiql" "^4.0.2"
+    "@pablosz/graphql-helix-graphiql" "^4.1.3"
 
 "@graphql-ez/utils@^0.1.2":
   version "0.1.2"
@@ -70,18 +70,17 @@
 "@n1ru4l/graphql-public-schema-filter@link:../dist":
   version "0.0.0"
 
-"@pablosz/graphql-helix-graphiql@^4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@pablosz/graphql-helix-graphiql/-/graphql-helix-graphiql-4.0.2.tgz#c19e4bcbdf751ce9b9fad986cc055165cde2667b"
-  integrity sha512-qK2VXx7wQv+z7HbHKJQT7EHbXsNFQhJxdD9S8Cv1Q8ItIkhnpnnELs7D3OsmjSIKHElturYPWH8bdQDFvwmfnA==
+"@pablosz/graphql-helix-graphiql@^4.1.3":
+  version "4.1.3"
+  resolved "https://registry.yarnpkg.com/@pablosz/graphql-helix-graphiql/-/graphql-helix-graphiql-4.1.3.tgz#fef3e0db35ea30131a10c6e711fea3c21579ba98"
+  integrity sha512-zK9QWfEIr3CleuNCrqKDLuMxK/1MGxG3Q/mxJnz3ZGIyA78jKCNxN8MsH6eUPX7El48QoS0Gr/NGocpAHBdqNg==
   dependencies:
     "@graphql-ez/utils" "^0.1.2"
-    filedirname "2.7.0"
 
-"@pablosz/graphql-helix@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@pablosz/graphql-helix/-/graphql-helix-2.0.0.tgz#e5dbabca4de5062f1ddb336672d0c09a177f980e"
-  integrity sha512-BI6dK+LK4jZK3NCJdR1E1Hguc3n+aaUtvJcCZtrSpAQThJ7L+osQbVUdc0V212COa1ouAKrh0VOZM4QCvck3Bw==
+"@pablosz/graphql-helix@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@pablosz/graphql-helix/-/graphql-helix-2.0.2.tgz#b39d6e069af280c5da8a7beb61459dddf8466696"
+  integrity sha512-3p5O/jtwrcOmVDioFgV0peyRsnn6c42rGHAY4vs6PzlrwAZTgkeAnMRP0Z7n8pNG7fbJEk9INoZFrs2FXUScVA==
 
 "@tsconfig/node10@^1.0.7":
   version "1.0.8"
@@ -385,13 +384,6 @@ escape-html@^1.0.3:
   resolved "https://registry.yarnpkg.com/escape-html/-/escape-html-1.0.3.tgz#0258eae4d3d0c0974de1c169188ef0051d1d1988"
   integrity sha1-Aljq5NPQwJdN4cFpGI7wBR0dGYg=
 
-filedirname@2.7.0:
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/filedirname/-/filedirname-2.7.0.tgz#aff98ce95590b89de5b502d51885095c01b1f36e"
-  integrity sha512-rw4NZ0XCpm4EeBp0NK2b1WUkCm/LSDg6mJR8ywV2JYvIiwe+fimMgwVxjgd94lbmx4rOOmxybeVHsB6SRNeaXQ==
-  dependencies:
-    get-current-line "^6.5.0"
-
 fresh@~0.5.2:
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/fresh/-/fresh-0.5.2.tgz#3d8cadd90d976569fa835ab1f8e4b23a105605a7"
@@ -402,11 +394,6 @@ function-bind@^1.1.1:
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"
   integrity sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==
 
-get-current-line@^6.5.0:
-  version "6.6.0"
-  resolved "https://registry.yarnpkg.com/get-current-line/-/get-current-line-6.6.0.tgz#3b01ef83a1bc732e190755853516e13783d5ea93"
-  integrity sha512-9q/tqdL4+GMb0P28N/oSFruQE/8Sa1l9ew73AWS4j/KEMY32wD8+5QRB8LSTgt9HUZuLplmi8vc5dFFf5OvROA==
-
 get-intrinsic@^1.0.2:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/get-intrinsic/-/get-intrinsic-1.1.1.tgz#15f59f376f855c446963948f0d24cd3637b4abc6"
@@ -416,15 +403,15 @@ get-intrinsic@^1.0.2:
     has "^1.0.3"
     has-symbols "^1.0.1"
 
-graphql-ez@0.13.1:
-  version "0.13.1"
-  resolved "https://registry.yarnpkg.com/graphql-ez/-/graphql-ez-0.13.1.tgz#4911a867c84d22e1ac4bf96eac6285176a193928"
-  integrity sha512-ezsU+74RXyh/o7737dFNEUiZzLK2dAiMU7wjQBIiW8GYupj+Scr23Iu31sTbWEkDX6lM/k3h0EgzZpj9OGDFXQ==
+graphql-ez@0.13.4:
+  version "0.13.4"
+  resolved "https://registry.yarnpkg.com/graphql-ez/-/graphql-ez-0.13.4.tgz#723b67a691e0ce2c99403cd57727c4aaa3e259b5"
+  integrity sha512-JcJYbYqeVWqNKxspIBzHMu2bJzptLi7+2Paen+GN3xsdiXBfR5hrUQ6P0AjLIOP7NjHtV4XRbuay2l4WvihG8w==
   dependencies:
-    "@envelop/core" "^1.1.0"
-    "@envelop/types" "^1.1.0"
+    "@envelop/core" "^1.6.0"
+    "@envelop/types" "^1.5.0"
     "@graphql-ez/utils" "^0.1.2"
-    "@pablosz/graphql-helix" "^2.0.0"
+    "@pablosz/graphql-helix" "^2.0.2"
     tiny-lru "7.0.6"
 
 has-symbols@^1.0.1:
