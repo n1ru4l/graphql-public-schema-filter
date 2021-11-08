@@ -12,7 +12,7 @@
     "@n1ru4l/graphql-public-schema-filter": "link:../dist",
     "@types/koa": "2.13.4",
     "@types/koa__router": "8.0.9",
-    "@types/node": "16.3.1",
+    "@types/node": "16.11.7",
     "ts-node": "10.4.0"
   },
   "peerDependencies": {
