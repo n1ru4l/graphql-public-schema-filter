@@ -14,10 +14,10 @@
   dependencies:
     "@cspotcode/source-map-consumer" "0.8.0"
 
-"@envelop/core@1.6.4", "@envelop/core@^1.6.1":
-  version "1.6.4"
-  resolved "https://registry.yarnpkg.com/@envelop/core/-/core-1.6.4.tgz#cf596d570428b87a7c8e22ee95b753ec837ccd90"
-  integrity sha512-/cUMG0ZVNwwNOu1ZFxFgzo7DyB17nkwpFZAAidkY+g+yNBWu+V76kwziH5Qdu7ca3Rv4F8u1Y0BWRlvMunb2sQ==
+"@envelop/core@1.7.1", "@envelop/core@^1.6.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@envelop/core/-/core-1.7.1.tgz#4cb397349ff40e3dc229175b9af58700d5742232"
+  integrity sha512-ZxeQs4G0FOzoFAH+zskubx5aM9kx6BiUvcSI9Lo3MfYBmnK7cjwcwDdwk6Mq48QDuAeVdGfDmQz+BiWg0k2GmQ==
   dependencies:
     "@envelop/types" "1.5.1"
 
