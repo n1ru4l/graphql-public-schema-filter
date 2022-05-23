@@ -1,24 +1,27 @@
-import Koa from "koa";
-import KoaRouter from "@koa/router";
+import { createServer, useLazyLoadedSchema } from "@graphql-yoga/node";
+import { privateSchema, publicSchema } from "./schema";
 
-import { ezApp } from "./app";
+const port = 8080 as const;
 
-const app = new Koa();
+const server = createServer({
+  schema: publicSchema,
+  plugins: [
+    useLazyLoadedSchema((context) =>
+      (context?.request as any).headers.get("authorization") === "private"
+        ? privateSchema
+        : publicSchema
+    ),
+  ],
+  graphiql: {
+    headers: JSON.stringify(
+      {
+        Authorization: "public",
+      },
+      null,
+      2
+    ),
+  },
+  port,
+});
 
-const router = new KoaRouter();
-
-ezApp
-  .buildApp({
-    app,
-    router,
-  })
-  .then(() => {
-    app.use(router.routes()).use(router.allowedMethods());
-
-    const port = 8080;
-    app.listen(port, () => {
-      console.log(
-        `GraphQL Server listening on port http://127.0.0.1:${port}/graphql`
-      );
-    });
-  });
+server.start();
