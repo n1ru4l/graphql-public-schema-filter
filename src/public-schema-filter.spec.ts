@@ -20,8 +20,11 @@ const buildSchema = (source: string) =>
     typeDefs: [publicDirectiveSDL, source],
   });
 
-const printIntrospectionSdl = (filteredSchema: GraphQLSchema) => {
-  const result = graphqlSync(filteredSchema, getIntrospectionQuery());
+const printIntrospectionSdl = (schema: GraphQLSchema) => {
+  const result = graphqlSync({
+    schema,
+    source: getIntrospectionQuery(),
+  });
   if (result.errors) {
     for (const error of result.errors) {
       // eslint-disable-next-line no-console
@@ -29,14 +32,14 @@ const printIntrospectionSdl = (filteredSchema: GraphQLSchema) => {
     }
   }
   const generatedSchema = printSchema(
-    buildClientSchema(result.data as IntrospectionQuery)
+    buildClientSchema(result.data as unknown as IntrospectionQuery)
   );
 
   return generatedSchema;
 };
 
 const formatSdl = (schema: GraphQLSchema) => {
-  const result = graphqlSync(schema, getIntrospectionQuery());
+  const result = graphqlSync({ schema, source: getIntrospectionQuery() });
   if (result.errors) {
     for (const error of result.errors) {
       // eslint-disable-next-line no-console
@@ -44,7 +47,7 @@ const formatSdl = (schema: GraphQLSchema) => {
     }
   }
   const introspectionSchema = buildClientSchema(
-    result.data as IntrospectionQuery
+    result.data as unknown as IntrospectionQuery
   );
   return printSchema(lexicographicSortSchema(introspectionSchema));
 };

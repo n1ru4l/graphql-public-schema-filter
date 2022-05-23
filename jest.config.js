@@ -3,7 +3,8 @@
 
 module.exports = {
   roots: ["<rootDir>/src"],
+  transformIgnorePatterns: ["node_modules/(?!graphql)"],
   transform: {
-    "^.+\\.tsx?$": "ts-jest"
-  }
+    "^.+\\.[jt]sx?$": "babel-jest",
+  },
 };
