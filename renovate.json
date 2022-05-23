@@ -1,19 +1,4 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base"],
-  "postUpdateOptions": ["yarnDedupeFewer"],
-  "packageRules": [
-    {
-      "groupName": "graphql-ez",
-      "matchPackagePrefixes": ["@graphql-ez", "graphql-ez"]
-    },
-    {
-      "groupName": "typescript-eslint",
-      "matchPackagePrefixes": ["@typescript-eslint"]
-    },
-    {
-      "groupName": "envelop",
-      "matchPackagePrefixes": ["@envelop"]
-    }
-  ]
+  "extends": ["github>the-guild-org/shared-config:renovate"]
 }
