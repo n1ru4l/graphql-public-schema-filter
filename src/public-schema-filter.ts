@@ -11,10 +11,10 @@ import {
   DirectiveNode,
   GraphQLFieldConfigArgumentMap,
   isNonNullType,
+  getNamedType,
 } from "graphql";
 import { MapperKind, mapSchema } from "@graphql-tools/utils";
-import { getWrappedType } from "./get-wrapped-type";
-import { Maybe } from "graphql/jsutils/Maybe";
+import type { Maybe } from "graphql/jsutils/Maybe";
 
 const builtInTypes = new Set([
   "String",
@@ -120,14 +120,14 @@ export const buildPublicSchema = (
           if (isFieldPublic === true || isTypePublic === true) {
             publicFieldReturnTypes.set(
               `${ttype.name}.${field.name}`,
-              getWrappedType(field.type).name
+              getNamedType(field.type).name
             );
             const fieldArgumentTypes: Array<string> = [];
             const fieldArguments = new Set<string>();
             for (const arg of field.args) {
               if (isNonNullType(arg.type) || isPublic(arg)) {
                 fieldArguments.add(arg.name);
-                fieldArgumentTypes.push(getWrappedType(arg.type).name);
+                fieldArgumentTypes.push(getNamedType(arg.type).name);
               }
             }
 
@@ -159,7 +159,7 @@ export const buildPublicSchema = (
           if (isTypePublic === true || isFieldPublic === true) {
             publicFieldReturnTypes.set(
               `${ttype.name}.${field.name}`,
-              getWrappedType(field.type).name
+              getNamedType(field.type).name
             );
           }
         }
@@ -237,7 +237,7 @@ export const buildPublicSchema = (
       for (const [name, fieldConfig] of Object.entries(config.fields)) {
         if (
           allAvailableFields.has(`${config.name}.${name}`) &&
-          publicTypeNames.has(getWrappedType(fieldConfig.type).name)
+          publicTypeNames.has(getNamedType(fieldConfig.type).name)
         ) {
           const args: GraphQLFieldConfigArgumentMap = {};
 
@@ -272,7 +272,7 @@ export const buildPublicSchema = (
       for (const [name, fieldConfig] of Object.entries(config.fields)) {
         if (
           allAvailableFields.has(`${config.name}.${name}`) &&
-          publicTypeNames.has(getWrappedType(fieldConfig.type).name)
+          publicTypeNames.has(getNamedType(fieldConfig.type).name)
         ) {
           newFields[name] = fieldConfig;
         }
@@ -285,7 +285,7 @@ export const buildPublicSchema = (
     [MapperKind.UNION_TYPE]: (unionType) => {
       const config = unionType.toConfig();
       const isPublic = config.types.every((objectType) =>
-        publicTypeNames.has(getWrappedType(objectType).name)
+        publicTypeNames.has(getNamedType(objectType).name)
       );
 
       return isPublic ? unionType : null;
@@ -300,7 +300,7 @@ export const buildPublicSchema = (
       for (const [name, fieldConfig] of Object.entries(config.fields)) {
         if (
           allAvailableFields.has(`${config.name}.${name}`) &&
-          publicTypeNames.has(getWrappedType(fieldConfig.type).name)
+          publicTypeNames.has(getNamedType(fieldConfig.type).name)
         ) {
           newFields[name] = fieldConfig;
         }
