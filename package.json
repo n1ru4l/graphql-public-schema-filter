@@ -45,7 +45,7 @@
     "graphql": "15.8.0",
     "husky": "7.0.4",
     "jest": "27.5.1",
-    "lint-staged": "11.2.6",
+    "lint-staged": "12.5.0",
     "patch-package": "6.4.7",
     "prettier": "2.4.1",
     "ts-jest": "27.1.1",
