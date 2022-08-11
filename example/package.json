@@ -10,10 +10,10 @@
   },
   "devDependencies": {
     "@n1ru4l/graphql-public-schema-filter": "link:../dist",
-    "@types/koa": "2.13.4",
+    "@types/koa": "2.13.5",
     "@types/koa__router": "8.0.11",
-    "@types/node": "16.11.27",
-    "ts-node": "10.4.0"
+    "@types/node": "16.11.47",
+    "ts-node": "10.9.1"
   },
   "peerDependencies": {
     "graphql": "15.8.0"
