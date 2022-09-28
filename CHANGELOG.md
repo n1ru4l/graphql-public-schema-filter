@@ -1,5 +1,11 @@
 # @n1ru4l/graphql-public-schema-filter
 
+## 1.0.0
+
+### Major Changes
+
+- [#159](https://github.com/n1ru4l/graphql-public-schema-filter/pull/159) [`2b3b576`](https://github.com/n1ru4l/graphql-public-schema-filter/commit/2b3b5762096f9d6e86e76e626f869162b3dad2a2) Thanks [@joseph-neeraj](https://github.com/joseph-neeraj)! - Upgrade to graphql 16
+
 ## 0.4.0
 
 ### Minor Changes

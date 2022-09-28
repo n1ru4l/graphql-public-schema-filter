@@ -1,6 +1,6 @@
 {
   "name": "@n1ru4l/graphql-public-schema-filter",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "Filter your GraphQL schema into a public schema.",
   "license": "MIT",
   "main": "dist/index.js",
