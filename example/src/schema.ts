@@ -21,6 +21,6 @@ const GraphQLQueryType = new GraphQLObjectType({
 export const privateSchema = new GraphQLSchema({
   query: GraphQLQueryType,
 });
-export const publicSchema = buildPublicSchema({
+export const { filteredSchema: publicSchema } = buildPublicSchema({
   schema: privateSchema
 });

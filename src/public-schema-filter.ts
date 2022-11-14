@@ -62,6 +62,13 @@ export type BuildPublicSchemaParameter = {
   isPublic?: typeof defaultIsPublic;
 };
 
+export type BuildPublicSchemaResponse = {
+  /** The filtered GraphQl schema */
+  filteredSchema: GraphQLSchema;
+  /** Warnings generated while filtering the schema, if any. */
+  warnings: string[];
+};
+
 /**
  * Maps the input schema to a public schema that only includes types and fields that are marked as public.
  * Conflicts that would result in an invalid schema, will be printed to the console.
@@ -69,7 +76,7 @@ export type BuildPublicSchemaParameter = {
  */
 export const buildPublicSchema = (
   params: BuildPublicSchemaParameter
-): GraphQLSchema => {
+): BuildPublicSchemaResponse => {
   const isPublic = params.isPublic ?? defaultIsPublic;
   const publicTypeNames: Set<string> = new Set(builtInTypes);
   const publicFieldReturnTypes: Map<string, string> = new Map();
@@ -169,16 +176,19 @@ export const buildPublicSchema = (
 
   const allAvailableFields = new Set(publicFieldReturnTypes.keys());
 
+  const warningMessages: string[] = [];
+
   // check availability of union types
   for (let unionType of unionTypes) {
     const types = unionType.getTypes();
     for (let unionTypeMember of types) {
       if (!publicTypeNames.has(unionTypeMember.name)) {
         publicTypeNames.delete(unionType.name);
-        logWarning(
-          `[public-introspection-filter] Type "${unionTypeMember.name}" is not marked as public.\n` +
-            ` -> The union "${unionType}" will not be marked as visible.`
-        );
+        const message =
+          `Type "${unionTypeMember.name}" is not marked as public.\n` +
+          ` -> The union "${unionType}" will not be marked as visible.`;
+        logWarning(`[public-introspection-filter] ${message}`);
+        warningMessages.push(message);
       }
     }
   }
@@ -188,10 +198,11 @@ export const buildPublicSchema = (
     for (let interfaceName of implementedInterfaces) {
       if (!publicTypeNames.has(interfaceName)) {
         publicTypeNames.delete(type);
-        logWarning(
-          `[public-introspection-filter] Interface "${interfaceName}" is not marked as public.\n` +
-            ` -> The type "${type}" which implements the interface will not be marked as visible.`
-        );
+        const message =
+          `Interface "${interfaceName}" is not marked as public.\n` +
+          ` -> The type "${type}" which implements the interface will not be marked as visible.`;
+        logWarning(`[public-introspection-filter] ${message}`);
+        warningMessages.push(message);
       }
     }
   }
@@ -199,10 +210,11 @@ export const buildPublicSchema = (
   // check availability of fields
   for (let [fieldPath, returnType] of publicFieldReturnTypes) {
     if (!publicTypeNames.has(returnType)) {
-      logWarning(
-        `[public-introspection-filter] Type "${returnType}" is not marked as public.\n` +
-          ` -> The field "${fieldPath}" will not be marked as visible.`
-      );
+      const message =
+        `Type "${returnType}" is not marked as public.\n` +
+        ` -> The field "${fieldPath}" will not be marked as visible.`;
+      logWarning(`[public-introspection-filter] ${message}`);
+      warningMessages.push(message);
       allAvailableFields.delete(fieldPath);
     }
     // @TODO: if field type is an interface type:
@@ -214,10 +226,11 @@ export const buildPublicSchema = (
   for (let [fieldPath, inputTypes] of publicFieldArgumentTypes) {
     for (let inputType of inputTypes) {
       if (!publicTypeNames.has(inputType)) {
-        logWarning(
-          `[public-introspection-filter] Input Type "${inputType}" is not marked as public.\n` +
-            ` -> The field "${fieldPath}" will not be marked as visible.`
-        );
+        const message =
+          `Input Type "${inputType}" is not marked as public.\n` +
+          ` -> The field "${fieldPath}" will not be marked as visible.`;
+        logWarning(`[public-introspection-filter] ${message}`);
+        warningMessages.push(message);
         allAvailableFields.delete(fieldPath);
       }
     }
@@ -226,7 +239,7 @@ export const buildPublicSchema = (
     // Required input arguments must always be public (or the Input Object type must be public.)
   }
 
-  return mapSchema(params.schema, {
+  const resultSchema = mapSchema(params.schema, {
     [MapperKind.OBJECT_TYPE]: (ttype) => {
       const config = ttype.toConfig();
       if (!publicTypeNames.has(config.name)) {
@@ -314,4 +327,9 @@ export const buildPublicSchema = (
     [MapperKind.ENUM_TYPE]: (ttype) =>
       publicTypeNames.has(ttype.name) ? ttype : null,
   });
+
+  return {
+    filteredSchema: resultSchema,
+    warnings: warningMessages,
+  };
 };
