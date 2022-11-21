@@ -88,6 +88,27 @@ it("can be called", () => {
   );
 });
 
+it("uses the onWarning callback when provided", () => {
+  const source = /* GraphQL */ `
+    type User {
+      id: ID!
+      login: String!
+    }
+
+    type Query {
+      me: User @public
+    }
+  `;
+
+  const schema = buildSchema(source);
+  
+  const onWarning = jest.fn();
+  lib.buildPublicSchema({ schema, onWarning });
+
+  expect(onWarning).toHaveBeenCalled();
+
+});
+
 it("does not expose the public directive", () => {
   const source = /* GraphQL */ `
     type User {
