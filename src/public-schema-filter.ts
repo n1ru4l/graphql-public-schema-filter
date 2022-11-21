@@ -60,17 +60,20 @@ export type BuildPublicSchemaParameter = {
   schema: GraphQLSchema;
   /** Overwrite this function for customizing how fields are determined as public. Uses `defaultIsPublic` per default. */
   isPublic?: typeof defaultIsPublic;
+  /** Callback to be invoked when schema filtering encounters conflicts that would result in an invalid schema. */
+  onWarning?: (message: string) => void;
 };
 
 /**
  * Maps the input schema to a public schema that only includes types and fields that are marked as public.
- * Conflicts that would result in an invalid schema, will be printed to the console.
+ * Conflicts that would result in an invalid schema, will be printed to the console. This can be overriden by the onWarning parameter.
  * The implementation tries to construct a valid schema by automatically hiding invalid constructs (such as empty ObjectTypes or fields whose return type is not public).
  */
 export const buildPublicSchema = (
   params: BuildPublicSchemaParameter
 ): GraphQLSchema => {
   const isPublic = params.isPublic ?? defaultIsPublic;
+  const onWarningCallback = params.onWarning ?? logWarning;
   const publicTypeNames: Set<string> = new Set(builtInTypes);
   const publicFieldReturnTypes: Map<string, string> = new Map();
   const publicFieldArguments: Map<string, Set<string>> = new Map();
@@ -175,7 +178,7 @@ export const buildPublicSchema = (
     for (let unionTypeMember of types) {
       if (!publicTypeNames.has(unionTypeMember.name)) {
         publicTypeNames.delete(unionType.name);
-        logWarning(
+        onWarningCallback(
           `[public-introspection-filter] Type "${unionTypeMember.name}" is not marked as public.\n` +
             ` -> The union "${unionType}" will not be marked as visible.`
         );
@@ -188,7 +191,7 @@ export const buildPublicSchema = (
     for (let interfaceName of implementedInterfaces) {
       if (!publicTypeNames.has(interfaceName)) {
         publicTypeNames.delete(type);
-        logWarning(
+        onWarningCallback(
           `[public-introspection-filter] Interface "${interfaceName}" is not marked as public.\n` +
             ` -> The type "${type}" which implements the interface will not be marked as visible.`
         );
@@ -199,7 +202,7 @@ export const buildPublicSchema = (
   // check availability of fields
   for (let [fieldPath, returnType] of publicFieldReturnTypes) {
     if (!publicTypeNames.has(returnType)) {
-      logWarning(
+      onWarningCallback(
         `[public-introspection-filter] Type "${returnType}" is not marked as public.\n` +
           ` -> The field "${fieldPath}" will not be marked as visible.`
       );
@@ -214,7 +217,7 @@ export const buildPublicSchema = (
   for (let [fieldPath, inputTypes] of publicFieldArgumentTypes) {
     for (let inputType of inputTypes) {
       if (!publicTypeNames.has(inputType)) {
-        logWarning(
+        onWarningCallback(
           `[public-introspection-filter] Input Type "${inputType}" is not marked as public.\n` +
             ` -> The field "${fieldPath}" will not be marked as visible.`
         );
