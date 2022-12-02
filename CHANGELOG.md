@@ -1,5 +1,15 @@
 # @n1ru4l/graphql-public-schema-filter
 
+## 1.1.0
+
+### Minor Changes
+
+- [#171](https://github.com/n1ru4l/graphql-public-schema-filter/pull/171) [`5169495`](https://github.com/n1ru4l/graphql-public-schema-filter/commit/5169495f25d0c9009a0ebf388c9066dd8ad55c62) Thanks [@joseph-neeraj](https://github.com/joseph-neeraj)! - accept an onWarning callback as parameter to the buildPublicSchema function
+
+### Patch Changes
+
+- [#174](https://github.com/n1ru4l/graphql-public-schema-filter/pull/174) [`7b4485c`](https://github.com/n1ru4l/graphql-public-schema-filter/commit/7b4485cf60dd76cf70b6f04c0973147943b225a9) Thanks [@joseph-neeraj](https://github.com/joseph-neeraj)! - fixed bug where the ast node was left unchanged after filtering the schema
+
 ## 1.0.0
 
 ### Major Changes
