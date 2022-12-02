@@ -11,6 +11,7 @@ import {
   DirectiveNode,
   GraphQLFieldConfigArgumentMap,
   isNonNullType,
+  GraphQLFieldConfig,
 } from "graphql";
 import { MapperKind, mapSchema } from "@graphql-tools/utils";
 import { getWrappedType } from "./get-wrapped-type";
@@ -265,6 +266,9 @@ export const buildPublicSchema = (
       }
       config.fields = newFields;
       return new GraphQLObjectType(config);
+    },
+    [MapperKind.OBJECT_FIELD]: (fieldConfig) => {
+      return fieldConfig;
     },
     [MapperKind.INPUT_OBJECT_TYPE]: (objectType) => {
       const config = objectType.toConfig();
