@@ -41,7 +41,7 @@
     "@types/jest": "29.2.4",
     "@typescript-eslint/eslint-plugin": "5.38.1",
     "@typescript-eslint/parser": "5.38.1",
-    "bob-the-bundler": "1.7.3",
+    "bob-the-bundler": "5.0.1",
     "@graphql-tools/schema": "9.0.4",
     "graphql": "16.6.0",
     "husky": "7.0.4",
