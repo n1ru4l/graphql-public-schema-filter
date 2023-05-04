@@ -6,11 +6,11 @@
     "@graphql-ez/plugin-graphiql": "0.11.5",
     "@koa/router": "10.1.1",
     "graphql-ez": "0.15.1",
-    "koa": "2.13.4"
+    "koa": "2.14.2"
   },
   "devDependencies": {
     "@n1ru4l/graphql-public-schema-filter": "link:../dist",
-    "@types/koa": "2.13.5",
+    "@types/koa": "2.13.6",
     "@types/koa__router": "8.0.11",
     "@types/node": "16.18.10",
     "ts-node": "10.9.1"
