@@ -1,5 +1,16 @@
 # @n1ru4l/graphql-public-schema-filter
 
+## 2.0.0
+
+### Major Changes
+
+- [#197](https://github.com/n1ru4l/graphql-public-schema-filter/pull/197) [`c63a0a7`](https://github.com/n1ru4l/graphql-public-schema-filter/commit/c63a0a7c30dd37390f01db285ee3f246e29198a6) Thanks [@n1ru4l](https://github.com/n1ru4l)! - drop support for Node.js 12
+
+### Patch Changes
+
+- [#179](https://github.com/n1ru4l/graphql-public-schema-filter/pull/179) [`1007643`](https://github.com/n1ru4l/graphql-public-schema-filter/commit/10076434046e7bd958020ec8f2f0bdcf63ea8595) Thanks [@renovate](https://github.com/apps/renovate)! - dependencies updates:
+  - Updated dependency [`@graphql-tools/utils@^9.0.0` ↗︎](https://www.npmjs.com/package/@graphql-tools/utils/v/9.0.0) (from `^8.0.0`, in `dependencies`)
+
 ## 1.1.0
 
 ### Minor Changes
