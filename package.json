@@ -54,7 +54,7 @@
     "bob-the-bundler": "6.0.0",
     "@graphql-tools/schema": "9.0.19",
     "graphql": "16.6.0",
-    "husky": "7.0.4",
+    "husky": "8.0.3",
     "jest": "29.5.0",
     "lint-staged": "11.2.6",
     "patch-package": "7.0.0",
