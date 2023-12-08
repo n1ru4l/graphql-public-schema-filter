@@ -9,7 +9,7 @@
     "@types/koa": "2.13.6",
     "@types/koa__router": "8.0.11",
     "@types/node": "18.16.5",
-    "ts-node": "10.9.1"
+    "ts-node": "10.9.2"
   },
   "peerDependencies": {
     "graphql": "16.x.x"
