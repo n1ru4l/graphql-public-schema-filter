@@ -580,13 +580,13 @@
   dependencies:
     "@changesets/types" "^6.1.0"
 
-"@changesets/changelog-github@0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@changesets/changelog-github/-/changelog-github-0.5.0.tgz#ae96e5029209f7386527b3821d9c988b1ab16662"
-  integrity sha512-zoeq2LJJVcPJcIotHRJEEA2qCqX0AQIeFE+L21L8sRLPVqDhSXY8ZWAt2sohtBpFZkBwu+LUwMSKRr2lMy3LJA==
+"@changesets/changelog-github@0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@changesets/changelog-github/-/changelog-github-0.5.1.tgz#58870f77cdfd6d59c73cc046a61e55e82d606d24"
+  integrity sha512-BVuHtF+hrhUScSoHnJwTELB4/INQxVFc+P/Qdt20BLiBFIHFJDDUaGsZw+8fQeJTRP5hJZrzpt3oZWh0G19rAQ==
   dependencies:
     "@changesets/get-github-info" "^0.6.0"
-    "@changesets/types" "^6.0.0"
+    "@changesets/types" "^6.1.0"
     dotenv "^8.1.0"
 
 "@changesets/cli@2.27.7":
