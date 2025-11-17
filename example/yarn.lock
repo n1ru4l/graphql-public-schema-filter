@@ -122,9 +122,9 @@
   version "0.0.0"
 
 "@peculiar/asn1-schema@^2.3.13", "@peculiar/asn1-schema@^2.3.8":
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/@peculiar/asn1-schema/-/asn1-schema-2.5.0.tgz#4e58d7c3087c4259cebf5363e092f85b9cbf0ca1"
-  integrity sha512-YM/nFfskFJSlHqv59ed6dZlLZqtZQwjRVJ4bBAiWV08Oc+1rSd5lDZcBEx0lGDHfSoH3UziI2pXt2UM33KerPQ==
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@peculiar/asn1-schema/-/asn1-schema-2.6.0.tgz#0dca1601d5b0fed2a72fed7a5f1d0d7dbe3a6f82"
+  integrity sha512-xNLYLBFTBKkCzEZIw842BxytQQATQv+lDTCEMZ8C196iJcJJMBUZxrhSTxLaohMyKK8QlzRNTRkUmanucnDSqg==
   dependencies:
     asn1js "^3.0.6"
     pvtsutils "^1.3.6"
@@ -154,9 +154,9 @@
   integrity sha512-AW8PKd6iX3vAZ0vA43nOUOnbq/X5ihgU+mSXXqunMkeQADGiqw/PY0JNeYtD5sr0PAy51YPgAPbDoeapv9r8WA==
 
 "@tsconfig/node10@^1.0.7":
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/@tsconfig/node10/-/node10-1.0.11.tgz#6ee46400685f130e278128c7b38b7e031ff5b2f2"
-  integrity sha512-DcRjDCujK/kCk/cUe8Xz8ZSpm8mS3mNNpta+jGCA6USEDfktlNvm1+IuZ9eTcDbNk41BHwpHHeW+N1lKCz4zOw==
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/@tsconfig/node10/-/node10-1.0.12.tgz#be57ceac1e4692b41be9de6be8c32a106636dba4"
+  integrity sha512-UCYBaeFvM11aU2y3YPZ//O5Rhj+xKyzy7mvcIoAjASbigy8mHMryP5cK7dgjlz2hWxh1g5pLw084E0a/wlUSFQ==
 
 "@tsconfig/node12@^1.0.7":
   version "1.0.11"
@@ -437,9 +437,9 @@ graphql-yoga@3.9.1:
     tslib "^2.3.1"
 
 hash-it@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/hash-it/-/hash-it-6.0.0.tgz#188df5a8ca2f8e036690e35f2ef88bd9417ff334"
-  integrity sha512-KHzmSFx1KwyMPw0kXeeUD752q/Kfbzhy6dAZrjXV9kAIXGqzGvv8vhkUqj+2MGZldTo0IBpw6v7iWE7uxsvH0w==
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/hash-it/-/hash-it-6.0.1.tgz#285fd4cbab97c880d1889240a35561fa71703664"
+  integrity sha512-qhl8+l4Zwi1eLlL3lja5ywmDQnBzLEJxd0QJoAVIgZpgQbdtVZrN5ypB0y3VHwBlvAalpcbM2/A6x7oUks5zNg==
 
 lru-cache@^6.0.0:
   version "6.0.0"
