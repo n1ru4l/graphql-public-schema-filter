@@ -2,7 +2,7 @@
   "name": "example",
   "private": true,
   "dependencies": {
-    "graphql-yoga": "3.9.1"
+    "graphql-yoga": "5.18.0"
   },
   "devDependencies": {
     "@n1ru4l/graphql-public-schema-filter": "link:../dist",
