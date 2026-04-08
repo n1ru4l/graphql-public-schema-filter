@@ -7,12 +7,12 @@ on:
 
 jobs:
   dependencies:
-    uses: the-guild-org/shared-config/.github/workflows/changesets-dependencies.yaml@main
+    uses: the-guild-org/shared-config/.github/workflows/changesets-dependencies.yaml@bcb53d910698d29749511f386139ad8180269101 # main
     secrets:
       githubToken: ${{ secrets.GITHUB_TOKEN }}
 
   release:
-    uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@main
+    uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@bcb53d910698d29749511f386139ad8180269101 # main
     with:
       npmTag: alpha
       buildScript: build
