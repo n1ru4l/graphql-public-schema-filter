@@ -258,10 +258,10 @@
   dependencies:
     "@types/koa" "*"
 
-"@types/koa@*", "@types/koa@2.15.0":
-  version "2.15.0"
-  resolved "https://registry.yarnpkg.com/@types/koa/-/koa-2.15.0.tgz#eca43d76f527c803b491731f95df575636e7b6f2"
-  integrity sha512-7QFsywoE5URbuVnG3loe03QXuGajrnotr3gQkXcEBShORai23MePfFYdhz90FEtBBpkyIYQbVD+evKtloCgX3g==
+"@types/koa@*", "@types/koa@2.15.1":
+  version "2.15.1"
+  resolved "https://registry.yarnpkg.com/@types/koa/-/koa-2.15.1.tgz#6f30a5cfab61c9260a9aa87cb1a7bc1aabab56ce"
+  integrity sha512-aec2WUXXqYGkRAoofpAGdugxmVBrYuH4FFN/kw8eA8n5GSngOGJE1VU7nqew26fLAPi4eo07H/HtXVNUui8tPQ==
   dependencies:
     "@types/accepts" "*"
     "@types/content-disposition" "*"
