@@ -12,7 +12,7 @@
     "ts-node": "10.9.2"
   },
   "peerDependencies": {
-    "graphql": "16.x.x"
+    "graphql": "16.x.x || 17.x"
   },
   "scripts": {
     "start": "node --experimental-specifier-resolution=node --loader ts-node/esm ./src/server.ts"
